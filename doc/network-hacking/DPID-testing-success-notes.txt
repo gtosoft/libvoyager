@@ -1,0 +1,145 @@
+
+
+Mode 22
+================================
+at caf 0
+at sh 7e0
+TX:	03 22 00 0c		Request  - request for pid 000C (RPM). 
+RX:	7E8 05 62 00 0C XX YY	Response - two bytes of RPM data!
+
+
+Diagnostic Codes
+===============================
+===============================
+
+Transmission response to 02 01 00 
+7EA 06 41 00 80 00 00 01 AA 	= Bitmask of supported pids: 41 00 80 00 00 01
+
+Engine ECU response to 02 01 00
+7E8 06 41 00 BE 3F B8 13 AA 	= Bitmask of supported pids: 41 00 BE 3F B8 13
+
+
+AT SH 243		= Set header to talk to Transmission
+01 3E			= Tester Present
+03 A9 81 02		= mode A9, read DTCs? 
+
+Sending from one window, I ran AT MT in another window and captured the following. 
+	>at mt 43			<-- I'll be sending to 243, which I think is the Transmission. 
+	243 02 01 0C 00 00 00 00 00 	<-- my request for mode 1 PID 0c (RPMs)
+	643 03 7F 01 11 00 00 00 00 
+	243 01 3E 00 00 00 00 00 00 	<-- My request - tester present
+	643 01 7E 00 00 00 00 00 00 
+	243 03 A9 81 02 00 00 00 00 	<-- My request - DTCs?
+	543 81 00 00 00 FF 00 00 00 
+
+AT SH 241 (Engine?)
+	>at mt 41
+	241 01 3E 00 00 00 00 00 00 	<-- My request (tester present)
+	641 01 7E 00 00 00 00 00 00 
+	241 03 A9 81 02 00 00 00 00 	<-- My request (get DTCs?)
+	541 81 00 00 00 FF 00 00 00 
+
+
+Second try: 
+AT SH 241
+03 A9 81 12
+	>at mt 41
+	241 01 3E 00 00 00 00 00 00 
+	641 01 7E B0 40 00 00 00 00 
+	241 03 A9 81 12 00 00 00 00 
+	541 81 00 00 00 FF 00 00 00 	<-- Response indicates "no codes are present". 
+
+
+
+
+Broadcast DPIDS
+===============================
+===============================
+
+
+Programming the ELM327 to capture the responses 
+===============================================
+* The following commands will program the ELM327 to 
+
+AT H1 		- print headers in responses. 
+AT CAF 0	- CAN Auto-formatting OFF
+AT L1		- linefeeds ON in responess. 
+AT SH 7E0	- set transmit header
+AT CM 5FF	- set CAN Filter MASK
+AT CF 7E8	- set CAN filter 
+AT ST 85	- This one sets the timeout for waiting for multiple responess. (FF=1 second, 85= about half a second). 
+01 3E		- tester present
+04 2C FB 00 0C	- define DPID FB to send PID 0C (request for engine RPM)
+03 AA 03 FB	- start broadcasting DPID FB at medium rate(03) or fast rate (04)
+
+
+Impala SS 
+7EA		- Transmission
+7E8		- Engine
+
+
+
+Sample responses
+-------------------
+5E8 FB 09 53 00 00 00 00 00 
+5E8 FB 09 4D 00 00 00 00 00 
+5E8 FB 09 5A 00 00 00 00 00 
+5E8 FB 09 6A 00 00 00 00 00 
+5E8 FB 09 7C 00 00 00 00 00 
+7E8 01 60 AA AA AA AA AA AA 
+
+
+
+
+Experimentation Notes
+========================
+
+* Create a DPID FE with just RPM and MAF
+  06 2C FE 00 0C 00 10 00 
+  06 2C 90 00 0E 00 0C
+  04 2C FB 00 0E = request out of range
+  04 2C FB 00 0C
+  06 2C 20 00 0C 00 10
+  04 2C 20 00 0E
+
+
+* assuming that command worked and created DPID FE, then to activate it at low rate: 
+  03 AA 02 FE
+  03 AA 03 90
+  03 AA 02 0C -- results in interesting things...
+  04 aa 01 fd fe -- works - just sends those two dpids once each. 
+  03 AA 02 FB
+  03 AA 02 0F
+  03 AA 02 20
+  05 AA 02 0C 0D 0E
+
+
+  03 aa 02 FA = request out of range (641 03 7F AA 31 00 00 00 00) 
+  * So we have slots FB-FE (four of them). 
+
+  06 AA 03 FB FC FD FE = this works - it streams, quite quickly, all four slots. 
+
+
+
+* Fails with no response - because I didn't create DPIDs 03, 30 and 10?
+  04 AA 03 30 10
+
+ 
+So what is this weird response I keep getting: 
+241 01 3E 00 00 00 00 00 00 
+641 01 7E 2C 31 00 00 00 00 = request out of range, or security not granted. 
+
+241 03 AA 03 80 00 00 00 00 = request that DPID 80 be sent and repeated. 
+641 03 7F AA 31 00 00 00 00 = request out of range
+
+241 01 01 00 00 00 00 00 00 
+641 03 7F 01 11 00 00 00 00  = service (01) not supported.
+
+7EA 01 7E AA AA AA AA AA AA  = OK I'll start sending the DPID broadcasts NOW. 
+
+
+
+
+
+
+
