@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+	<LinearLayout 
+			xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/drll"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    >
+	
+		<RelativeLayout android:id="@+id/drRelativeLayout" android:layout_width="wrap_content" android:layout_height="wrap_content">
+
+		<HorizontalScrollView 
+			android:id="@+id/drhsv1" 
+			android:layout_height="wrap_content" 
+			android:layout_width="wrap_content"
+			android:layout_centerHorizontal="true"
+			android:layout_alignParentTop="true"
+			android:layout_alignParentRight="true"
+			>
+			<TextView 
+				android:id="@+id/drtvCurrentMessages"
+				android:text="No Active DTCs"
+				android:textSize="40sp"
+				android:layout_height="wrap_content" 
+				android:layout_width="fill_parent"
+				android:textColor="#FF0000"
+				android:background="#200000"
+			/>
+		</HorizontalScrollView>
+	
+		<!--  TODO: Add a text box for the transmitter to sniff. default to ALL and also offer 40,59, etc, dropdown. -->
+
+		<ScrollView 
+			android:id="@+id/drsvhistoryMessages" 
+			android:layout_height="fill_parent" 
+			android:layout_width="fill_parent"
+			android:layout_alignParentLeft="true"
+			android:layout_below="@id/drhsv1"
+			android:layout_alignParentBottom="true"
+			android:layout_alignParentRight="true"
+		>
+			
+			<!--  heading textview. -->
+
+			<TextView 
+				android:id="@+id/drtvHistoryMessages" 
+				android:text="No History DTCs"
+				android:textSize="25dp"
+				android:layout_height="fill_parent" 
+				android:layout_width="fill_parent"
+				android:layout_alignParentLeft="true"
+				android:layout_alignParentTop="true"
+				android:layout_alignParentBottom="true"
+				android:layout_alignParentRight="true"
+			/>
+
+		</ScrollView>
+		
+		</RelativeLayout>
+
+</LinearLayout>
+

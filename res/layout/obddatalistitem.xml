@@ -1,0 +1,16 @@
+<TableLayout 
+		xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/TableLayout01" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content">
+
+	<TableRow android:id="@+id/TableRow01w3adf" android:layout_width="wrap_content" android:layout_height="wrap_content">
+
+		<CheckBox android:id="@+id/OBDLISTcbSelected" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/ODLISTtvRequest" android:text="request" android:textSize="6sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/ODLISTtvDescription" android:text="description" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingRight="5dp"/>
+
+	</TableRow>
+	
+	
+</TableLayout>
