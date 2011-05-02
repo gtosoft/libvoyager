@@ -3,7 +3,7 @@
 What Is libvoyager? 
 =================================================================
 
-libvoyager is a set of Java classes which together make up what the 'libvoyager' code base. 
+libvoyager is a set of Java classes which together make up the 'libvoyager' code base. 
 The code base is designed for Android but since it's written in Java, it should be easily 
 portable to other platforms including regular PCs and other types of smart devices. 
 
@@ -13,5 +13,9 @@ sophistocated but they are supported too to some degree.
 
 
 
+
+Legal
+=================================================================
+(C) 2011 libvoyager is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License. Permissions beyond the scope of this license may be available at http://www.gtosoft.com. You can download, use, and modify libvoyager as long as you give mention to libvoyager, and it is not part of a paid software package. 
 
 
