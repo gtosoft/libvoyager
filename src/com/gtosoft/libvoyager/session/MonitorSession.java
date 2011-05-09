@@ -19,7 +19,6 @@ import android.util.Log;
  * and OBD state, while presenting new data to upper layers by way of a callback
  * method.
  * 
- * @author Brad Hein / GTOSoft LLC. All Rights Reserved.
  */
 public class MonitorSession {
 	final boolean DEBUG = true;

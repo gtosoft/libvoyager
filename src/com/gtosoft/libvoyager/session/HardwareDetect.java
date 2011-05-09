@@ -32,8 +32,6 @@ import com.gtosoft.libvoyager.util.PIDDecoder;
  *  
  *  * This code is not re-entrant
  *  
- * @author Brad Hein / GTOSoft. All rights reserved. 
- *
  */
 public class HardwareDetect {
 	boolean mThreadsOn = true;

@@ -26,8 +26,6 @@ import android.app.Activity;
    	2.  aHelper.startDiscovering();
    	3.  Expect to get a call to your chosenCallback EventCallback. It will pass you the MAC of the chosen device. 
  * 
- * @author Brad Hein - GTOSoft LLC
- * 
  */  
 public class ActivityHelper {
 	Context mctxParent = null;
