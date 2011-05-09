@@ -1,0 +1,16 @@
+
+Real-time HP/TQ Feature:
+Some equations for you for realtime HP/TQ for your consideration 
+
+HP = MGV/375
+m=weight of vehicle in lbs
+g=acceleration in gs
+v=speed of vehicle in mph
+
+Torque=HP*5252/RPM
+
+* For more calculations like this, Also see: 
+  http://www.elec-toolbox.com/Formulas/Motor/mtrform.htm
+
+
+

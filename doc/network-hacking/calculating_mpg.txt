@@ -1,0 +1,37 @@
+
+Calculating MPG - based on two scenarios - whether you  have MAF senasor or not. 
+
+
+MAF Sensor:
+
+
+MPG = (14.7 * 6.17 * 454 * VSS * 0.621371) / (3600 * MAF / 100)
+= 710.7 * VSS / MAF
+
+14.7 - grams of air to 1 gram of gasoline - ideal air/fuel ratio
+6.17 - pounds per gallon - density of gasoline
+4.54 - grams per pound - conversion
+VSS - vehicle speed in kilometers per hour
+0.621371 - miles per hour/kilometers per hour - conversion
+3600 - seconds per hour - conversion
+MAF - mass air flow rate in 100 grams per second
+100 - to correct MAF to give grams per second
+
+No MAF (Uses MAP and Intake Temp to approximate MAF):
+
+IMAP = RPM * MAP / IAT
+MAF = (IMAP/120)*(VE/100)*(ED)*(MM)/(R)
+
+MAP - Manifold Absolute Pressure in kPa
+IAT - Intake Air Temperature in Kelvin
+R - Specific Gas Constant (8.314 JM/K)
+MM - Average molecular mass of air (28.97 g/M)
+VE - volumetric efficiency measured in percent
+ED - Engine Displacement in liters
+
+This method requires tweaking of the VE for accuracy.
+
+I have no idea if these are the methods the SGII uses. The accuracy will be off due to approximations (AFR ~14.7, etc). All the information is from the brilliant mind of Bruce Lightner.
+
+- LostCause
+
