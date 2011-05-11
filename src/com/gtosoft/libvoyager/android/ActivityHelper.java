@@ -3,7 +3,7 @@
  * Permissions beyond the scope of this license may be available at http://www.gtosoft.com. You can download, 
  * use, modify the code as long as you do not include it as part of commercial software.
  */
-
+// test comment.
 package com.gtosoft.libvoyager.android;
 
 import android.bluetooth.BluetoothAdapter;
