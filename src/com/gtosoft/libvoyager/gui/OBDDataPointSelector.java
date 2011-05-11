@@ -102,7 +102,6 @@ public class OBDDataPointSelector extends ListActivity {
 	        // Define what action to take when a checkbox is clicked. 
 	        OnCheckedChangeListener listener = new OnCheckedChangeListener() {
 				
-				@Override
 				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 					if (isChecked == true) {
 						// Add DPN to the set. 

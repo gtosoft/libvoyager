@@ -20,21 +20,18 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.android.vending.licensing.AESObfuscator;
-import com.android.vending.licensing.ValidationException;
-import com.gtosoft.libvoyager.util.EasyTime;
-import com.gtosoft.libvoyager.util.GeneralStats;
-import com.gtosoft.libvoyager.util.UnitConverter;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.gtosoft.libvoyager.util.EasyTime;
+import com.gtosoft.libvoyager.util.GeneralStats;
+import com.gtosoft.libvoyager.util.UnitConverter;
 
 //import com.android.vending.licensing.AESObfuscator;
 //import com.android.vending.licensing.ValidationException;
