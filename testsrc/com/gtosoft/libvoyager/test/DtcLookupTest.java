@@ -18,12 +18,13 @@ public class DtcLookupTest {
 				"Transmission Fluid Level Too Low",
 				"Up and Down Shift Switch to Transmission Range Correlation"};
 
-		NetDTCInfo ndi = new NetDTCInfo("unitTest");
+		NetDTCInfo ndi = new NetDTCInfo("JU:NU:TE:ST:IN:GG");
 		
 		String thisDescr = "";
 		for (int i=0;i<testdtcs.length;i++) {
 			thisDescr = ndi.getDTCDescription(testdtcs[i]);
-			assertEquals (thisDescr,dtcDescriptions[i]);
+			thisDescr = thisDescr.trim();
+			assertEquals (dtcDescriptions[i],thisDescr);
 		}
 
 	}// end of testNetDTCLookup. 
