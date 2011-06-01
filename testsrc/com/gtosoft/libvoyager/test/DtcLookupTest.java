@@ -23,8 +23,7 @@ public class DtcLookupTest {
 		String thisDescr = "";
 		for (int i=0;i<testdtcs.length;i++) {
 			thisDescr = ndi.getDTCDescription(testdtcs[i]);
-			thisDescr = thisDescr.trim();
-			assertEquals (dtcDescriptions[i],thisDescr);
+			assertEquals (dtcDescriptions[i], thisDescr);
 		}
 
 	}// end of testNetDTCLookup. 
