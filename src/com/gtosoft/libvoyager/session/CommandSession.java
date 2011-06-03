@@ -378,7 +378,7 @@ public class CommandSession {
 		if (mMsgEventCallback == null)
 			Log.d ("cmd: ",message);
 		else
-			mMsgEventCallback.newMsg("cmd: " + message);
+			mMsgEventCallback.onNewMessageArrived("cmd: " + message);
 	}
 
 	/**

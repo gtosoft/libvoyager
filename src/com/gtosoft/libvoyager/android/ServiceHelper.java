@@ -35,8 +35,8 @@ public class ServiceHelper {
 	 * Default constructor - obtain context of the parent activity.
 	 * @param c
 	 */
-	public ServiceHelper(Context ctxOfActivity) {
-		mctxParent = ctxOfActivity;
+	public ServiceHelper(Context ctxOfService) {
+		mctxParent = ctxOfService;
 //		registerBroadcastReceivers();
 	}
 

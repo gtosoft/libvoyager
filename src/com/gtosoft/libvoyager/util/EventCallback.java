@@ -31,7 +31,7 @@ public class EventCallback {
 	 * A method to be executed by a lower level class in order to 
 	 * @param message
 	 */
-	public void newMsg(String message) {
+	public void onNewMessageArrived (String message) {
 	}
 
 	/**

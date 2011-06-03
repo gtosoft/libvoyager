@@ -305,7 +305,7 @@ public class PIDDecoder {
 
 		// pass messages up to the Dash Activity if they registered a callback.
 		if (mNewMessageHandler != null)
-			mNewMessageHandler.newMsg("Dakota: " + m);
+			mNewMessageHandler.onNewMessageArrived("Dakota: " + m);
 		else
 			Log.d("Dakota", m);
 	}

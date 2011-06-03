@@ -275,7 +275,7 @@ public class OBD2Session {
 
 	private void msg(String message) {
 		if (mMessageCallback != null) {
-			mMessageCallback.newMsg("obd: " + message);
+			mMessageCallback.onNewMessageArrived("obd: " + message);
 		} else {
 			Log.d("OBD(sess):", message);
 		}

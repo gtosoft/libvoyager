@@ -282,7 +282,7 @@ public class ELMBT {
 	 */
 	private void msg (String message) {
 		if (mMessageCallback != null) {
-			mMessageCallback.newMsg("bt:" + message);
+			mMessageCallback.onNewMessageArrived("bt:" + message);
 		} 
 		else {
 			Log.d("BT:",message);

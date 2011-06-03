@@ -100,12 +100,9 @@ public class HybridSession {
 	/**
 	 * Constructor.
 	 * 
-	 * @param btAdapter
-	 *            - a reference to the bluetooth adapter.
-	 * @param btAddr
-	 *            - Bluetooth address of the peer we want to connect to.
-	 * @param dashDB
-	 *            - an instance of DashDB.
+	 * @param btAdapter - a reference to the bluetooth adapter.
+	 * @param btAddr    - Bluetooth address of the peer we want to connect to.
+	 * @param dashDB    - an instance of DashDB.
 	 */
 	public HybridSession(BluetoothAdapter btAdapter, String btAddr, DashDB dashDB, EventCallback OOBEventCallback) {
 
@@ -188,7 +185,7 @@ public class HybridSession {
 	private void msg(String m) {
 
 		if (mecbMsg != null)
-			mecbMsg.newMsg(m);
+			mecbMsg.onNewMessageArrived(m);
 		else
 			Log.d("HS", m);
 
@@ -238,9 +235,9 @@ public class HybridSession {
 			ddb.shutdown();
 	}
 
-	com.gtosoft.libvoyager.util.EventCallback messageCallback = new com.gtosoft.libvoyager.util.EventCallback() {
+	EventCallback messageCallback = new com.gtosoft.libvoyager.util.EventCallback() {
 		@Override
-		public void newMsg(String message) {
+		public void onNewMessageArrived(String message) {
 			msg("HS: " + message);
 		}
 	};
@@ -296,10 +293,8 @@ public class HybridSession {
 
 
 	/**
-	 * Just for testing - registers a dp handler which just sends new DPNs
-	 * through the msg() system for display.
-	 * 
-	 * @return
+	 * Override onDPArrived method of EventCallback and register with us to get a call any time a DPN is decoded.
+	 * @return - true on success. 
 	 */
 	public boolean registerDPArrivedCallback(EventCallback DPArrivedCallback) {
 		if (pd == null) {

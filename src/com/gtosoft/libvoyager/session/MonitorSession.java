@@ -583,7 +583,7 @@ public class MonitorSession {
 
 	private void msg(String message) {
 		if (mMessageCallback != null) {
-			mMessageCallback.newMsg("moni: " + message);
+			mMessageCallback.onNewMessageArrived("moni: " + message);
 		} else {
 			Log.d("moni:", message);
 		}
