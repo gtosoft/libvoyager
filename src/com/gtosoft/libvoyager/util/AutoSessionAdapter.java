@@ -55,7 +55,7 @@ public class AutoSessionAdapter {
 	 */
 	private void choosePeerDevice () {
         msHelper = new ServiceHelper(mctxParentService);
-        msHelper.registerChosenDeviceCallback(chosenCallback);
+//        msHelper.registerChosenDeviceCallback(chosenCallback);
         msHelper.startDiscovering();
 	}
 	

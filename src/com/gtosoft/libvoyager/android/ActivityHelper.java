@@ -96,7 +96,9 @@ public class ActivityHelper {
 				}
 
 				// Does it have a name that suggests it is an OBD device?
-				if (device.getName().toLowerCase().contains("obd") || device.getName().toLowerCase().contains("cantool")) {
+				if (	device.getName().toLowerCase().contains("obd") || 
+						device.getName().toLowerCase().contains("cantool") ||
+						device.getName().toLowerCase().contains("plx")) {
 					msg("ELM Bluetooth device FOUND! Name=" + device.getName() + " MAC=" + device.getAddress());
 					// unregister broadcast receiver!
 			    	unregisterAllReceivers();
