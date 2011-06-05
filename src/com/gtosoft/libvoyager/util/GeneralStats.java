@@ -54,6 +54,27 @@ public class GeneralStats {
 	}
 
 	/**
+	 * Convenience method to set an integer stat. 
+	 * @param key - stat key, think hierarchy. 
+	 * @param value - integer value to set that stat to. It will still be stored as a string. 
+	 * @return - returns current genStats hashmap. 
+	 */
+	public HashMap<String,String> setStat (String key, int value) {
+		return setStat(key, "" + value);
+	}
+
+	/**
+	 * Convenience method to set a long stat. 
+	 * @param key - stat key, think hierarchy. 
+	 * @param value - integer value to set that stat to. It will still be stored as a string. 
+	 * @return - returns current genStats hashmap. 
+	 */
+	public HashMap<String,String> setStat (String key, long value) {
+		return setStat(key, "" + value);
+	}
+
+	
+	/**
 	 * Returns a new (thread-safe) hashmap containing all of our stats.  
 	 * @return - returns a new hashmap containing all our stats. 
 	 */
@@ -144,6 +165,47 @@ public class GeneralStats {
 		
 		return allStats;
 	}// end of getAllStats. 
+
 	
+	/**
+	 * Takes the given key and sets it to a new value which is one greater than what it was last. 
+	 * In the case that the stat hasn't been set before, we create it and set it to 1. 
+	 * @param key
+	 */
+	public void incrementStat(String key) {
+		int newVal = 1;
+		
+		if (mhmStats.containsKey(key)) {
+			try {
+				newVal = Integer.valueOf(mhmStats.get(key)) + 1;
+			} catch (Exception e) {
+				msg ("UNEXPECTEDD NUMBER PROBLEM (this shouldn't happen). Old Value " + mhmStats.get(key) + " E=" + e.getMessage());
+			}
+		} 
+
+		setStat(key, newVal);
+	}
+	
+	public String getAllStatsAsString () {
+		String allStats = "";
+		
+		HashMap<String,String> hmStats = mhmStats;
+		
+		// use a treeSet for auto sorting... 
+		Set<String> s = new TreeSet<String>(hmStats.keySet());
+		Iterator<String> i = s.iterator();
+		
+		String key = "";
+		String value = "";
+		while (i.hasNext()) {
+			key = i.next();
+			value = hmStats.get(key);
+			allStats = allStats + key + "=" + value + "\n";
+		}// end of while
+
+		return allStats;
+	}// end of getAllStatsaSString
+
 	
 }
+

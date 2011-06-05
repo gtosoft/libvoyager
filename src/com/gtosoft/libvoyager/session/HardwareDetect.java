@@ -401,6 +401,8 @@ public class HardwareDetect {
 		}
 	}
 
+	
+	
 	/**
 	 * This method gets called in the case where OBD2 support is affirmed and we want to know if sniffing is also possible. 
 	 */
@@ -595,7 +597,7 @@ public class HardwareDetect {
 				mhmCapabilities.get(KEY_BLUETOOOTH_MAC)
 				);
 
-if (DEBUG) msg ("Retrieved SWCAN support string from database, SWCANSupport=" + hardwareType); 
+		if (DEBUG) msg ("Retrieved SWCAN support string from database, SWCANSupport=" + hardwareType); 
 
 		
 		// Take the value we just read from profile and put it in the capabilities hashmap. 

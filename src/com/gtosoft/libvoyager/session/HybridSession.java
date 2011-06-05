@@ -388,6 +388,10 @@ public class HybridSession {
 			return false;
 		
 	}
+	
+	public HardwareDetect getHardwareDetectData () {
+		return mHardwareInfo;
+	}
 
 	public String getCapabilitiesString () {
 
@@ -403,6 +407,14 @@ public class HybridSession {
 		
 	}
 	
+	/**
+	 *  
+	 * @return - True if a detection was executed and successful. false otherwise. 
+	 */
+	public boolean isDetectionValid () {
+		return mHardwareInfo.isDetectionValid();
+	}
+	
 	public RoutineScan getRoutineScan () {
 		return mRoutineScan;
 	}
@@ -411,8 +423,7 @@ public class HybridSession {
 		if (mOOBDataHandler == null)
 			return;
 
-		if (	dataName.equals(OOBMessageTypes.SESSION_STATE_CHANGE) && 
-				areSessionOOBEventsSuspended() == true) {
+		if (dataName.equals(OOBMessageTypes.SESSION_STATE_CHANGE) && areSessionOOBEventsSuspended() == true) {
 			
 			if (DEBUG) msg ("Supressed one Message: Session state changed, value=" + dataValue);
 			return;
@@ -598,8 +609,8 @@ public class HybridSession {
 		} else {
 			return false;
 		}
-		
 	}
+	
 
 	public boolean registerMsgCallback(EventCallback ecbMsg) {
 

@@ -1,8 +1,11 @@
 package com.gtosoft.libvoyager.test;
 
+import static org.junit.Assert.*;
+
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
+
 import com.gtosoft.libvoyager.net.NetDTCInfo;
+
 
 public class DtcLookupTest {
 
