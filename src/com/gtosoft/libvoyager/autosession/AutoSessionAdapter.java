@@ -219,7 +219,8 @@ public class AutoSessionAdapter {
 	EventCallback mDPArrivedCallback = new EventCallback () {
 		@Override
 		public void onDPArrived(String DPN, String sDecodedData, int iDecodedData) {
-			msg ("(event)DP: " + DPN + "=" + sDecodedData);
+			msg ("(autoSession event)DP: " + DPN + "=" + sDecodedData);
+			sendOOBMessage("teststate", DPN + "=" + sDecodedData);
 		}
 	};
 	

@@ -39,6 +39,7 @@ public class AutoSessionOBD {
 		rs = new RoutineScan(hs.getOBDSession(), hs.getPIDDecoder());
 		
 		rs.addDPN("RPM");
+		rs.addDPN("SPEED");
 		
 		msg ("AutoSessionOBD initialized.");
 	}
