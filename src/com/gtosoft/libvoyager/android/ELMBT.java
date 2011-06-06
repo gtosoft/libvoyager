@@ -39,7 +39,7 @@ public class ELMBT {
 	int mTotalFailedConnects = 0;
 	int mTotalSuccessfulConnects = 0;
 	
-	final boolean DEBUG=false;
+	final boolean DEBUG=true;
 
 	final boolean USE_REFLECTION = false;
 	
@@ -850,6 +850,7 @@ public class ELMBT {
 			return false;
 		}
 		
+		if (DEBUG) msg ("RAW: " + sendThis);
 		ioResetOutputErrorCount();
 		return true;
 	}

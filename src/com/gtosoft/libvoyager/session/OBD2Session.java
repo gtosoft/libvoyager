@@ -18,6 +18,7 @@ import com.gtosoft.libvoyager.util.GTOMath;
 import com.gtosoft.libvoyager.util.GeneralStats;
 import com.gtosoft.libvoyager.util.PIDDecoder;
 
+import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
 
 
@@ -41,7 +42,7 @@ import android.util.Log;
 // PIDDecoder.getDataByName("RPM") for example.
 
 public class OBD2Session {
-	final boolean DEBUG = false;
+	final boolean DEBUG = true;
 
 	// This will be set to the correct value as soon as we detect that we are in a connected state. 
 	int mELMProtocol = 0;
@@ -381,7 +382,17 @@ public class OBD2Session {
 	// static final int STATE_BTCONFIGURED = 20;
 	// static final int STATE_OBDCONNECTED = 30;
 	// // (once we've reached obdConnected, there's no higher we need to go.)
+	int mOBDStateTries = 0;
 	private int enterStateForOBD() {
+		mOBDStateTries++;
+		mgStats.setStat("obdStateTries", mOBDStateTries);
+		
+		// reset that shatzzzzz
+		if (mOBDStateTries == 3) {
+			msg ("WARNING: Device is acting weird. we're sending a reset...");
+			ebt.sendATCommand("ATZ");
+		}
+		
 		boolean ret = false;
 
 		// this is the state we'll return. Throughout each step of the process
@@ -806,6 +817,10 @@ public class OBD2Session {
 	public String sendDTCReset() {
 		if (ebt != null)
 			return ebt.sendOBDCommand("04");
+		else {
+			msg ("ERROR: EBT is null. Cannot send OBD DTC reset command to clear the active trouble codes.");
+		}
+			
 
 		return "";
 	}
