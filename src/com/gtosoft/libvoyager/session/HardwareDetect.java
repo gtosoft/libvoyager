@@ -383,7 +383,10 @@ public class HardwareDetect {
 	}
 
 	private void findOutIfHardwareIsSWCAN () {
+		
+		// tryMoniSession takes one arg, if it's set to "true" then moni is set up in low-speed CAN mode. if false, it sets up for high speed monitor. 
 		String ret = tryMoniSession(true);
+
 		// Make sure and suspend it afterwards. 
 		if (DEBUG) msg ("Moni support is: " + ret + " suspending now...");
 		sess_monitor._suspend();
@@ -391,7 +394,9 @@ public class HardwareDetect {
 		
 		if (ret.length() == 0) {
 			// SWCAN Moni not supported... Either device not SWCAN or vehicle not connected. INCONCLUSIVE. 
+			mgStats.setStat("support.swcan.reason","no 33k packets observed");
 		} else {
+			mgStats.setStat("support.swcan.reason","33k packets observed: " + ret);
 			// Valid moni response received, which tells us the device IS SWCAN! Log all affirmations below: 
 			mhmCapabilities.put(KEY_MONI_RESPONSE, ret);
 			mhmCapabilities.put(KEY_SUPPORTS_OBD,"false");
@@ -399,6 +404,7 @@ public class HardwareDetect {
 			mhmCapabilities.put(KEY_HW_IS_SWCAN,"true");
 			mhmCapabilities.put(KEY_SUPPORTS_MONI,"true");
 		}
+		
 	}
 
 	
@@ -411,16 +417,21 @@ public class HardwareDetect {
 		// Sanity check/s. 
 		if (!mhmCapabilities.containsKey(KEY_OBD_RESPONSE)) {
 			msg ("ERROR: unable to find out if OBD2 supports moni because obd response is null/missing from hm");
+			mgStats.setStat("support.obd2.reason", "no capabilities entry");
 			return;
 		}
 		
 		if (mhmCapabilities.get(KEY_OBD_RESPONSE).contains("CAN")) {
 			mhmCapabilities.put(KEY_SUPPORTS_MONI,"true");
+			mgStats.setStat("support.obd2.reason", "OBD Response contains \"CAN\"" + ": " + mhmCapabilities.get(KEY_OBD_RESPONSE));
 		} else {
 			// based on the obd2 protocol string we're going to say sniffing isn't possible with this device.
-			if (DEBUG) msg ("Based on OBD2 response string, we don't think sniffing is possible. response string was: " + mhmCapabilities.get(KEY_OBD_RESPONSE));
+			String obdChoiceReason = "Based on OBD2 response string, we don't think sniffing is possible. response string was: " + mhmCapabilities.get(KEY_OBD_RESPONSE);
+			if (DEBUG) msg (obdChoiceReason);
 			mhmCapabilities.put(KEY_SUPPORTS_MONI,"false");
+			mgStats.setStat("support.obd2.reason",obdChoiceReason);
 		}
+		
 	}
 	
 

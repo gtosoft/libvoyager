@@ -39,7 +39,7 @@ public class ELMBT {
 	int mTotalFailedConnects = 0;
 	int mTotalSuccessfulConnects = 0;
 	
-	final boolean DEBUG=true;
+	final boolean DEBUG=false;
 
 	final boolean USE_REFLECTION = false;
 	
@@ -239,13 +239,12 @@ public class ELMBT {
 		return true;
 	}
 
+	
 	/**
-	 * If conditions are appropriate, then try to make a connection. 
-	 * @return - false if conditions weren't appropriate to try to connect. True means we tried to connect (may or may not have been successful) 
+	 * Are conditions right for us to connect? 
+	 * @return
 	 */
-	private boolean connectIfAble() {
-		boolean ret;
-		
+	private boolean ableToConnect () {
 		// sanity checks
 		if (mReconnectIfDisconnected != true)
 			return false;
@@ -259,6 +258,20 @@ public class ELMBT {
 			return false;
 		}
 
+		return true;
+	}
+	
+	/**
+	 * If conditions are appropriate, then try to make a connection. 
+	 * @return - false if conditions weren't appropriate to try to connect. True means we tried to connect (may or may not have been successful) 
+	 */
+	private boolean connectIfAble() {
+		boolean ret;
+		
+		if (!ableToConnect())
+			return false;
+
+		
 		// if execution reaches this point then the stars have aligned, and conditions are appropriate for us to try to connect.
 		
 		// mark the timestamp when we last tried to connect(). 

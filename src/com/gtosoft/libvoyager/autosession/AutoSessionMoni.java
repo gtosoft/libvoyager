@@ -2,6 +2,7 @@ package com.gtosoft.libvoyager.autosession;
 
 import android.util.Log;
 
+import com.gtosoft.libvoyager.session.HybridSession;
 import com.gtosoft.libvoyager.util.EventCallback;
 import com.gtosoft.libvoyager.util.GeneralStats;
 
@@ -22,13 +23,20 @@ public class AutoSessionMoni {
 	
 	GeneralStats	mgStats = new GeneralStats();
 	EventCallback	mOOBDataHandler = null;
+	HybridSession	hs = null;
 	
 
 	/**
 	 * Default constructor. 
 	 */
-	public AutoSessionMoni() {
+	public AutoSessionMoni(HybridSession hsession,EventCallback OOBDataHandler) {
+		hs = hsession;
+		mOOBDataHandler = OOBDataHandler;
+
+		// set session type to OBD. That's all we'll be doing here.
+		hs.setActiveSession(HybridSession.SESSION_TYPE_MONITOR);
 		
+		msg ("AutoSessionMoni: Switch to moni - complete.");
 	}
 	
 	public GeneralStats getStats () {

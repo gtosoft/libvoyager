@@ -1,15 +1,15 @@
-package com.gtosoft.libvoyager.util;
+package com.gtosoft.libvoyager.autosession;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.sax.StartElementListener;
 import android.util.Log;
 
 import com.gtosoft.libvoyager.android.ServiceHelper;
-import com.gtosoft.libvoyager.autosession.AutoSessionMoni;
-import com.gtosoft.libvoyager.autosession.AutoSessionOBD;
 import com.gtosoft.libvoyager.db.DashDB;
 import com.gtosoft.libvoyager.session.HybridSession;
+import com.gtosoft.libvoyager.util.EasyTime;
+import com.gtosoft.libvoyager.util.EventCallback;
+import com.gtosoft.libvoyager.util.GeneralStats;
 
 /**
  * 
@@ -162,11 +162,15 @@ public class AutoSessionAdapter {
 			//	If unsuccessful, then continuously re-try as long as bt remains connected.
 			if (dataName.equals(HybridSession.OOBMessageTypes.IO_STATE_CHANGE)) {
 				if (dataValue.equals("0")) {
-					msg ("Bluetooth just disconnected.");
 					// Bluetooth just disconnected.
+					msg ("Bluetooth just disconnected.");
+					if (hs.getEBT().isIODoneTrying() == true) {
+						sendOOBMessage("ebt.donetrying", "true");
+					}
 				} else {
-					msg ("Bluetooth just connected. kicking off config thread. ");
 					// Bluetooth just connected!
+					sendOOBMessage("ebt.donetrying", "false");
+					msg ("Bluetooth just connected. kicking off config thread. ");
 					new Thread() {
 						public void run () {
 							setCurrentStateMessage("BT Connected. Configuring...");
@@ -175,8 +179,11 @@ public class AutoSessionAdapter {
 								setCurrentStateMessage("Network configured.");
 								// Set up a home session here. the home session will handle main processing of whichever type connection we have.
 								if (hs.getHardwareDetectData().isMoniSupported().equals("true") || hs.getHardwareDetectData().isHardwareSWCAN().equals("true")) { 
-									mAutoMoni = new AutoSessionMoni ();
+									// Stars are aligned. Go moni.
+									// TODO: Don't necessary switch to moni right now unless the attached CAN network is SUPPORTED/RECOGNIZED.
+									mAutoMoni = new AutoSessionMoni (hs, mOOBEventCallback);
 								} else {
+									// Fall back on OBD. 
 									mAutoOBD = new AutoSessionOBD(hs,mOOBEventCallback);
 								}
 							} 
