@@ -365,7 +365,8 @@ public class HybridSession {
 		
 		msg ("Attempting to get capabilities!");
 		hmCapabilities = mHardwareInfo.getCapabilities();
-
+		// we won't necessarily use the capabilities hashmap but in a second we'll make individual calls to methods in hardwareinfo class to find capabilities. 
+		
 		// Assign handles from hDetect class over to us. some or all of these may be null if not supported or detected. 
 		sess_obd2 	 = mHardwareInfo.getOBD2Session();
 		sess_monitor = mHardwareInfo.getMonitorSession();

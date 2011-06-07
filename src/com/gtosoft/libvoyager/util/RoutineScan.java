@@ -64,7 +64,8 @@ public class RoutineScan {
 						requestAllDPNs();
 					}
 
-					EasyTime.safeSleep(500);
+					
+//					EasyTime.safeSleep(500);
 					
 				}// end of while. 
 			}// end of run().

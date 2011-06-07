@@ -174,18 +174,18 @@ public class HardwareDetect {
 
 		mThreadsOn = false;
 
-		// Dereference all member variables so they can be gc'd. 
-		mgStats 	= null;
-
-		ebt 		= null;
-		ddb 		= null;
-		pd 			= null;
+//		// Dereference all member variables so they can be gc'd. 
+//		mgStats 	= null;
+//
+//		ebt 		= null;
+//		ddb 		= null;
+//		pd 			= null;
+//		
+//		sess_cmd 	= null;
+//		sess_obd2 	= null;
+//		sess_monitor= null;
 		
-		sess_cmd 	= null;
-		sess_obd2 	= null;
-		sess_monitor= null;
-		
-		mhmCapabilities = null;
+//		mhmCapabilities = null;
 		
 	}
 	
@@ -506,10 +506,17 @@ public class HardwareDetect {
 			
 		}
 		
-		// Make sure we leave things suspended. 
-		if (sess_obd2 != null) 		sess_obd2._suspend();
-		if (sess_monitor != null) 	sess_monitor._suspend();
+		// leave stuff in suspended state before returning results. 
 		if (sess_cmd != null)		sess_cmd.suspend();
+		if (sess_obd2 != null) 		sess_obd2._suspend();
+		if (sess_monitor != null)	sess_monitor._suspend();
+		
+		
+//		// leave one of these two unsuspended based on what's supported. 
+//		if (!isOBD2Supported().equals("true") && sess_obd2 	  != null) sess_obd2._suspend();
+//		if (!isMoniSupported().equals("true") && sess_monitor != null) sess_monitor._suspend(); 
+		
+
 		
 	}
 

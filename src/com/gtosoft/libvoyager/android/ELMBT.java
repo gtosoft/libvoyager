@@ -39,7 +39,7 @@ public class ELMBT {
 	int mTotalFailedConnects = 0;
 	int mTotalSuccessfulConnects = 0;
 	
-	final boolean DEBUG=true;
+	final boolean DEBUG=false;
 
 	final boolean USE_REFLECTION = false;
 	
@@ -1354,6 +1354,7 @@ public class ELMBT {
 	}
 	
 	public GeneralStats getStats () {
+		updateAllStats();
 		return mGenStats;
 	}
 	
