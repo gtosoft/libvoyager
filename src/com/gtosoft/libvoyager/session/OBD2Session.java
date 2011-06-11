@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import android.util.Log;
+
 import com.gtosoft.libvoyager.android.ELMBT;
 import com.gtosoft.libvoyager.db.DashDB;
 import com.gtosoft.libvoyager.util.EasyTime;
@@ -17,9 +19,6 @@ import com.gtosoft.libvoyager.util.EventCallback;
 import com.gtosoft.libvoyager.util.GTOMath;
 import com.gtosoft.libvoyager.util.GeneralStats;
 import com.gtosoft.libvoyager.util.PIDDecoder;
-
-import android.telephony.gsm.GsmCellLocation;
-import android.util.Log;
 
 
 /**
@@ -42,7 +41,7 @@ import android.util.Log;
 // PIDDecoder.getDataByName("RPM") for example.
 
 public class OBD2Session {
-	final boolean DEBUG = true;
+	final boolean DEBUG = false;
 
 	// This will be set to the correct value as soon as we detect that we are in a connected state. 
 	int mELMProtocol = 0;

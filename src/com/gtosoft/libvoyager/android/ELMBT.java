@@ -653,7 +653,8 @@ public class ELMBT {
 	 */
 	public synchronized String sendOBDCommand (String Command) {
 		String response = "";
-		
+
+		// not too short though, "03" and "04" are totally valid. 
 		if (Command.length() < 2) {
 			msg ("Warning: OBD request too short! " + Command);
 			return "";
