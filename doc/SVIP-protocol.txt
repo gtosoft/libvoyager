@@ -1,0 +1,43 @@
+
+
+SVIP - Simple Vehicle Interface Protocol. 
+
+Purpose: define the communication packet structure that links libvoyager to a remote UI. 
+
+
+command (request)	arg1	arg2	arg3	Response	arg1	arg2		arg3	arg4	comments
+===========================================================================================================================
+PING			X	X	X	ACK		PONG	libvoyager	X	X	built-in
+AUTH			PASSWORDX	X	ACK/NACK	X	X		X	X	authenticat to gain access.
+OOB			on/off	X	X	ACK		X	X		X	X	turn or off unsolicited OOB events
+DPDATA			on/off	X	X	ACK		X	X		X	X	turn on or off unsolicited DPN Arrived events./
+
+
+Sample Transation. 
+
+CLIENT					SERVER
+==================================================================
+PING|>		<_		
+		  >			ACK|PONG|>
+
+AUTH|SECRET|>	<_
+		  >			ACK|>
+
+OOB|on|>	<_
+		  >			ACK|>
+
+					OOB|IOCONNECT|1|>
+					OOB|SESSIONDETECT|detected network as CAN 500 moni=yes|>
+					OOB|MSG|Diagnostic message: asdfad asdfa sd fsdf|>
+					DPDATA|SPEED|25|>
+					DPDATA|RPM|1500|>
+					DPDATA|RPM|1510|>
+					DPDATA|RPM|1505|>
+					DPDATA|SPEED|27|>
+
+
+
+* libVoyager will support more than one simultaneous connections. 
+* Any connection can elect to receive OOB events and/or decoded-data (DPDATA) events. 
+
+
