@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.gtosoft.libvoyager.session.HybridSession;
 import com.gtosoft.libvoyager.util.EasyTime;
+import com.gtosoft.libvoyager.util.GeneralStats;
 
 /**
  * The life of this class corresponds to a single open SVIP connection. When the
@@ -19,6 +20,7 @@ import com.gtosoft.libvoyager.util.EasyTime;
  */
 
 public class SVIPStreamServer {
+	GeneralStats mgStats = new GeneralStats();
 	// this String will contain partial message as we read them from the input buffer. 
 	String mCurrentMessage = "";
 
@@ -71,13 +73,11 @@ public class SVIPStreamServer {
 						sendSVIPMessage(SVIPConstants.RESPONSE_ACK, responses);
 					}
 
-					// pause between loops. if interrupted, break out of the
-					// loop.
+					// pause between loops. if interrupted, break out of the loop.
 					if (!EasyTime.safeSleep(500))
 						break;
 				}// end of while.
-				msg("SVIP Stream / Command handler thread has died. Threadson="
-						+ mThreadsOn);
+				if (DEBUG) msg("SVIP Stream / Command handler thread has died. Threadson="	+ mThreadsOn);
 			}// end of run();
 		};// end of thread definition.
 
@@ -100,7 +100,7 @@ public class SVIPStreamServer {
 		// Read zero or more bytes from the input stream, up to the end-of-message character. 
 		String newData = readUpToCharacter('>');
 		// append this data. 
-		mCurrentMessage = mCurrentMessage + newData;
+		if (newData != null) mCurrentMessage = mCurrentMessage + newData;
 		
 		// Do we have a complete message?
 		if (mCurrentMessage.endsWith(">") && !mCurrentMessage.endsWith("\\>")) {
@@ -145,10 +145,12 @@ public class SVIPStreamServer {
 				// core loop. appends bytes one at a time, stops at (and appends) stopCharacter if encounterd. 
 				while (mInStream.available() > 0 && thisChar != stopCharacter) {
 					thisChar = mInStream.read();
-					if (thisChar > 0)
+					if (thisChar > 0) {
 						messageData = messageData + (char) thisChar;
-					else 
+//						if (DEBUG) msg ("TCP IP MESSAGE SO FAR IS " + messageData);
+					}	else {
 						if (DEBUG) msg ("Threw out NULL from input stream.");
+					}
 				}// end of while() that grabs input bytes one at a time until it reaches the end or the stop character. 
 			} catch (IOException e) {
 				msg ("Exception while reading from input stream: E=" + e.getMessage());
@@ -173,12 +175,36 @@ public class SVIPStreamServer {
 	 * @return
 	 */
 	private String[] processRawCommand(String rawCommand) {
+		final int MESSAGE_PART_COMMAND = 0;
+		final int MESSAGE_PART_REQUEST = 1;
+		final int MESSAGE_PART_ARG1    = 2;
+		final int MESSAGE_PART_ARG2    = 3;
+		
 		// initialize response with a single message - "NACK", which gets used only if we don't recognize the request.  
 		String[] responses = {SVIPConstants.RESPONSE_NACK};
 
-		// Ping/pong?
-		if (rawCommand.equals(SVIPConstants.REQUEST_PING)) {
-			responses = new String [] {SVIPConstants.RESPONSE_ACK, SVIPConstants.REQUEST_PONG};
+		String [] messageParts;
+		// no messages contained within?
+		if (rawCommand.length() < 2)
+			return responses;
+
+		// split the message into its components. 
+		messageParts = rawCommand.split("\\|");
+		
+		msg ("Raw Command " + rawCommand + " has " + messageParts.length + " parts");
+		
+		// zero items in the list? 
+		if (messageParts != null && messageParts.length < 1) {
+			return responses;
+		}
+
+		// now that we at least have the command, built the default response for that. 
+		responses = new String [] {messageParts[MESSAGE_PART_COMMAND],SVIPConstants.RESPONSE_NACK};
+
+		
+		// Acknowledge that we recieved their "PING" and add a "PONG".  
+		if (messageParts[MESSAGE_PART_COMMAND].equals(SVIPConstants.REQUEST_PING)) {
+			responses = new String [] {SVIPConstants.REQUEST_PING, SVIPConstants.RESPONSE_PONG, "libVoyager"};
 		}
 		
 		
@@ -322,6 +348,10 @@ public class SVIPStreamServer {
 
 	}
 
+	public GeneralStats getStats () {
+		return mgStats;
+	}
+	
 	private void msg(String m) {
 		Log.d("SVIPStreamServer", m);
 	}

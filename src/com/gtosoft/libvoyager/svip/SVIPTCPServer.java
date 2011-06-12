@@ -8,6 +8,8 @@ import java.net.Socket;
 import java.util.Iterator;
 import java.util.List;
 
+import android.util.Log;
+
 import com.gtosoft.libvoyager.session.HybridSession;
 import com.gtosoft.libvoyager.util.EasyTime;
 import com.gtosoft.libvoyager.util.GeneralStats;
@@ -75,7 +77,9 @@ public class SVIPTCPServer {
 	private boolean bindToServerPort () {
 		// bind/re-bind to the port. 
 		try {
+			msg ("Binding to server socket port " + SVIP_SERVER_PORT);
 			mServerSocket = new ServerSocket(SVIP_SERVER_PORT);
+			msg ("Succecssfully bound to port " + SVIP_SERVER_PORT);
 		} catch (IOException e) {
 			msg ("ERROR instantiating new server socket on port " + SVIP_SERVER_PORT + " E=" + e.getMessage());
 			return false;
@@ -91,9 +95,13 @@ public class SVIPTCPServer {
 	private boolean instantiateServerSocketIfNecessary() {
 		// remains true unless one of the sub functions fails. 
 		boolean ret = true;
+		
+		if (DEBUG) 
+			if (mServerSocket != null) 
+				msg ("server socket is " + mServerSocket + " bound=" + mServerSocket.isBound() + " closed=" + mServerSocket.isClosed());
 
 		// unbind if necessary and then bind/re-bind to the port. 
-		if (mServerSocket == null || mServerSocket.isClosed() == true) {
+		if (mServerSocket == null) {
 			mgStats.incrementStat("bind.attempts");
 			// release and re-bind to the socket. 
 			if (!releaseServerSocket()) ret = false;
@@ -138,7 +146,7 @@ public class SVIPTCPServer {
 						} else {
 							msg ("Received a connect but the connection was not connected... wtf");
 						}
-					} catch (IOException e) {
+					} catch (Exception e) {
 						// Not a big deal - the socket.accept method failed, which probably means the server socket isn't properly bound. we'll try again in a second when we loop.  
 					}
 
@@ -260,15 +268,41 @@ public class SVIPTCPServer {
 		// Shut down all open TCP Sockets too. 
 		mThreadsOn = false;
 		if (mtAcceptThread != null) mtAcceptThread.interrupt();
+
+		mgStats.setStat("shutdown", "true");
 		
 		closeAllStreams();
 		
 		// Try to close the server socket. 
 		try { mServerSocket.close();} catch (IOException e) { }
 	}
+
+	private void getAllPeerStats() {
+		if (mOpenSockets == null || mOpenSockets.size() < 1) 
+			return;
+		
+		Iterator<SVIPStreamServer> i = mOpenSockets.iterator();
+		SVIPStreamServer s;
+		int streamnum = 0;
+		while (i.hasNext()) {
+			streamnum++;
+			s = i.next();
+			mgStats.merge("svipStream[" + streamnum + "]", s.getStats());
+		}
+	}
+	
+	/**
+	 * get stats. 
+	 * @return
+	 */
+	public GeneralStats getStats () {
+		getAllPeerStats();
+		return mgStats;
+	}
+	
 	
 	private void msg (String m) {
-		
+		Log.d("SVIPTCPServer",m);
 	}
 	
 }

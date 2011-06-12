@@ -7,6 +7,8 @@ import android.util.Log;
 import com.gtosoft.libvoyager.android.ServiceHelper;
 import com.gtosoft.libvoyager.db.DashDB;
 import com.gtosoft.libvoyager.session.HybridSession;
+import com.gtosoft.libvoyager.svip.SVIPStreamServer;
+import com.gtosoft.libvoyager.svip.SVIPTCPServer;
 import com.gtosoft.libvoyager.util.EasyTime;
 import com.gtosoft.libvoyager.util.EventCallback;
 import com.gtosoft.libvoyager.util.GeneralStats;
@@ -30,6 +32,10 @@ public class AutoSessionAdapter {
 	DashDB 			 ddb;
 	GeneralStats	 mgStats = new GeneralStats();
 	ServiceHelper 	 msHelper;
+
+	// SVIP server component. listens for incoming connections. its lifecycle should track that of the hybridsession. 
+	SVIPTCPServer mSVIPServer;
+
 	
 	AutoSessionMoni  mAutoMoni;
 	AutoSessionOBD   mAutoOBD;
@@ -97,14 +103,18 @@ public class AutoSessionAdapter {
 	 * do a hardware detection routine. 
 	 */
 	private synchronized boolean setupHSession (String btAddr) {
-	   	mgStats.incrementStat ("sessionSetups");
+	   	mgStats.incrementStat ("session.setupcount");
 
 	   	// If HS is null this is the initial connect. Otherwise it's a reconnection. 
 		if (hs != null) {
 			msg ("WARNING: hs already set up. setting up again. ");
+			hs.shutdown();
+			mSVIPServer.shutdown();
 		} else {
 			// Instantiate the hybridsession. It will start by trying to connect ot the bluetooth peer. 
 			hs = new HybridSession(mbtAdapter, btAddr, ddb, mOOBEventCallback);
+			
+			mSVIPServer = new SVIPTCPServer(hs);
 		}
 		
 		// Info/debug message handler.
@@ -115,6 +125,9 @@ public class AutoSessionAdapter {
 		
 		// Register to be notified any time a datapoint is decoded. 
 		hs.registerDPArrivedCallback(mDPArrivedCallback);
+		
+		mSVIPServer = new SVIPTCPServer(hs);
+		
 		
 		return true;
 	}
@@ -235,6 +248,7 @@ public class AutoSessionAdapter {
 		
 		// Merge stats from hybrid session. 
 		if (hs != null) mgStats.merge("hs", hs.getStats());
+		if (mSVIPServer != null) mgStats.merge("svip", mSVIPServer.getStats());
 		
 		// TODO: Merge stats from any connectors such as a command socket or an events socket. 
 
@@ -279,6 +293,9 @@ public class AutoSessionAdapter {
 
 	public void shutdown () {
 		if (hs != null) hs.shutdown();
+		
+		// shut down the SVIP socket and any open connections. 
+		if (mSVIPServer != null) mSVIPServer.shutdown();
 	}
 
 	public HybridSession getHybridSession () {

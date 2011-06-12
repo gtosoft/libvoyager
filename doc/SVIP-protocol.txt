@@ -18,13 +18,15 @@ Sample Transation.
 CLIENT					SERVER
 ==================================================================
 PING|>		<_		
-		  >			ACK|PONG|>
+		  >			ACK|PING|PONG|>
 
+AUTH|BADSECRET|> <_
+		  >			NACK|AUTH|>
 AUTH|SECRET|>	<_
-		  >			ACK|>
+		  >			ACK|AUTH|>
 
 OOB|on|>	<_
-		  >			ACK|>
+		  >			ACK|OOB|>
 
 					OOB|IOCONNECT|1|>
 					OOB|SESSIONDETECT|detected network as CAN 500 moni=yes|>

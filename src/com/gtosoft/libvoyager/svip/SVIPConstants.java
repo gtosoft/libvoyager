@@ -10,7 +10,7 @@ public class SVIPConstants {
 
 	public static final String REQUEST_PING = "PING";
 
-	public static final String REQUEST_PONG = "PONG";
+	public static final String RESPONSE_PONG = "PONG";
 
 
 }
