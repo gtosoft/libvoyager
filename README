@@ -12,6 +12,13 @@ libvoyager was designed to link Android phones to the onboard network found in a
 sophistocated but they are supported too to some degree. 
 
 
+Using livVoyager
+=================================================================
+* check-out the libvoyager git project into Eclipse
+* right-click the libvoyager project -> Android -> Library, and enable the checkbox "Is Library". 
+* Create a new app, and in it you can reference the libvoyager code just like any other library. 
+
+
 
 
 Legal
