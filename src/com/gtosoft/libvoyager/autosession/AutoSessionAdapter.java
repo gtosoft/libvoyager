@@ -7,7 +7,6 @@ import android.util.Log;
 import com.gtosoft.libvoyager.android.ServiceHelper;
 import com.gtosoft.libvoyager.db.DashDB;
 import com.gtosoft.libvoyager.session.HybridSession;
-import com.gtosoft.libvoyager.svip.SVIPStreamServer;
 import com.gtosoft.libvoyager.svip.SVIPTCPServer;
 import com.gtosoft.libvoyager.util.EasyTime;
 import com.gtosoft.libvoyager.util.EventCallback;
@@ -26,6 +25,7 @@ import com.gtosoft.libvoyager.util.GeneralStats;
 
 
 public class AutoSessionAdapter {
+	final boolean DEBUG = true;
 	HybridSession	 hs; 					// hybrid session is the top of the libVoyager pyramid. it manages everything else. 
 	Context			 mctxParentService;		// a reference to the parent context so that we can do things like work with Bluetooth. 
 	BluetoothAdapter mbtAdapter;
@@ -125,6 +125,8 @@ public class AutoSessionAdapter {
 		
 		// Register to be notified any time a datapoint is decoded. 
 		hs.registerDPArrivedCallback(mDPArrivedCallback);
+
+		if (DEBUG) hs.setRoutineScanDelay(1000);
 		
 		mSVIPServer = new SVIPTCPServer(hs);
 		
@@ -283,13 +285,14 @@ public class AutoSessionAdapter {
 		mOOBDataHandler.onOOBDataArrived(dataName, dataValue);
 	}
 	
-	/**
-	 * Passes a message to the android log by default. 
-	 * @param m - the message to send.
-	 */
 	private void msg (String m) {
-		Log.d("AutoSessionAdapter",m);
+		Log.d("AutoSessionAdapter","[T=" + getThreadID() + "] " + m);
 	}
+
+    private String getThreadID () {
+        final String m = "[T" + Thread.currentThread().getId() + "]";
+        return m;
+}
 
 	public void shutdown () {
 		if (hs != null) hs.shutdown();

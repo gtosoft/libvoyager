@@ -16,6 +16,8 @@ import com.gtosoft.libvoyager.session.OBD2Session;
 
 public class RoutineScan {
 	
+	int scanLoopDelay = 0;
+	
 	final boolean DEBUG = false;
 	
 	int successfulRequests = 0;
@@ -53,7 +55,6 @@ public class RoutineScan {
 					loops++;
 					mgStats.setStat("loops", "" + loops);
 
-//					EasyTime.safeSleep(500);
 
 					// If we're not connected, sleep a bit. If we're connected, then scan the DPNs!
 					if (mOBD.getCurrentState() < 40) {
@@ -65,12 +66,21 @@ public class RoutineScan {
 					}
 
 					
-//					EasyTime.safeSleep(500);
+					if (scanLoopDelay > 0) 
+						EasyTime.safeSleep(scanLoopDelay);
 					
 				}// end of while. 
 			}// end of run().
 		};// end of mscanthread definition. 
 		mScanThread.start();
+	}
+
+	/**
+	 * sets the number of milliseconds to pause between each iteration of the routine scan. default is zero. 
+	 * @param delayMillis
+	 */
+	public void setScanLoopDelay (int delayMillis) {
+		scanLoopDelay = delayMillis;
 	}
 	
 	/**

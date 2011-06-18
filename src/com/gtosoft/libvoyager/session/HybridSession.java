@@ -686,5 +686,16 @@ public class HybridSession {
 		
 	}
 
+	/**
+	 * Sets the number of milliseconds to pause in between iterations of the routine scan (used only in OBD2 mode). 
+	 * @param delayMillis
+	 */
+	public void setRoutineScanDelay (int delayMillis) {
+		if (mRoutineScan != null) {
+			mRoutineScan.setScanLoopDelay(delayMillis);
+		} else {
+			if (DEBUG) msg ("FAILED to set routine scan loop delay because it's not instantiated yet.");
+		}
+	}
 	
 }

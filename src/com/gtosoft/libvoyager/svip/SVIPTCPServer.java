@@ -24,7 +24,7 @@ import com.gtosoft.libvoyager.util.GeneralStats;
  *
  */
 
-public class SVIPTCPServer {
+public class SVIPTCPServer implements RequiresShutdown{
 	GeneralStats mgStats = new GeneralStats();
 	final boolean DEBUG = true;
 	// libvoyager started in 2009. Seems like a good port. 
@@ -77,10 +77,10 @@ public class SVIPTCPServer {
 	private boolean bindToServerPort () {
 		// bind/re-bind to the port. 
 		try {
-			msg ("Binding to server socket port " + SVIP_SERVER_PORT);
+			msg ("Binding to server socket port " + SVIP_SERVER_PORT + " server socket pointer is " + mServerSocket);
 			mServerSocket = new ServerSocket(SVIP_SERVER_PORT);
 			msg ("Succecssfully bound to port " + SVIP_SERVER_PORT);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			msg ("ERROR instantiating new server socket on port " + SVIP_SERVER_PORT + " E=" + e.getMessage());
 			return false;
 		}
@@ -99,6 +99,8 @@ public class SVIPTCPServer {
 		if (DEBUG) 
 			if (mServerSocket != null) 
 				msg ("server socket is " + mServerSocket + " bound=" + mServerSocket.isBound() + " closed=" + mServerSocket.isClosed());
+			else 
+				msg ("server socket is null");
 
 		// unbind if necessary and then bind/re-bind to the port. 
 		if (mServerSocket == null) {
@@ -106,8 +108,9 @@ public class SVIPTCPServer {
 			// release and re-bind to the socket. 
 			if (!releaseServerSocket()) ret = false;
 			if (!bindToServerPort()) ret = false;
+		} else {
+			if (DEBUG) msg ("Server Socket variable is NOT null, so we didn't try to re-bind.");
 		}
-
 		return ret;
 	}
 
@@ -252,6 +255,8 @@ public class SVIPTCPServer {
 	 * @return
 	 */
 	private boolean closeAllStreams () {
+		if (mOpenSockets == null || mOpenSockets.size() < 1) return true;
+		
 		Iterator <SVIPStreamServer> i = mOpenSockets.iterator();
 		SVIPStreamServer s;
 		while (i.hasNext()) {
@@ -274,7 +279,7 @@ public class SVIPTCPServer {
 		closeAllStreams();
 		
 		// Try to close the server socket. 
-		try { mServerSocket.close();} catch (IOException e) { }
+		try { mServerSocket.close();} catch (Exception e) { }
 	}
 
 	private void getAllPeerStats() {
@@ -302,7 +307,12 @@ public class SVIPTCPServer {
 	
 	
 	private void msg (String m) {
-		Log.d("SVIPTCPServer",m);
+		Log.d("SVIPTCPServer","[T=" + getThreadID() + "] " + m);
 	}
-	
+
+    private String getThreadID () {
+        final String m = "[T" + Thread.currentThread().getId() + "]";
+        return m;
+}
+
 }

@@ -13,7 +13,7 @@
 	<uses-permission android:name="android.permission.INTERNET" />
 
 
-    <application android:icon="@drawable/icon" android:label="appname">
+    <application android:icon="@drawable/icon" android:label="appname" android:debuggable="true">
         <activity android:name=".libVoyagerActivity"
                   android:label="appname">
             <intent-filter>
