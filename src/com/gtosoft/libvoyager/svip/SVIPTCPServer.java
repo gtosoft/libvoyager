@@ -24,7 +24,7 @@ import com.gtosoft.libvoyager.util.GeneralStats;
  *
  */
 
-public class SVIPTCPServer implements RequiresShutdown{
+public class SVIPTCPServer {
 	GeneralStats mgStats = new GeneralStats();
 	final boolean DEBUG = true;
 	// libvoyager started in 2009. Seems like a good port. 
