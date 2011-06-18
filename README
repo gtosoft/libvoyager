@@ -7,7 +7,7 @@ libvoyager is a set of Java classes which together make up the 'libvoyager' code
 The code base is designed for Android but since it's written in Java, it should be easily 
 portable to other platforms including regular PCs and other types of smart devices. 
 
-libvoyager was designed to link Android phones to the onboard network found in all modern vehicles 
+libvoyager was designed to link Android devices to the onboard network found in all modern vehicles 
 (say 2001 and newer). Older vehicles (model year 1997-2001) also have onboard networks but are less 
 sophistocated but they are supported too to some degree. 
 
