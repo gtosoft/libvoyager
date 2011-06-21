@@ -194,7 +194,7 @@ public class SVIPTCPServer {
 	}
 	
 	/**
-	 * For each alive TCP Socket, call its sendOOB method to pass it this data.
+	 * For each alive TCP Socket, call its sendOOB maddOpenSockethod to pass it this data.
 	 * @param dataName - oob data name
 	 * @param dataValue - data value for that oob. 
 	 */
