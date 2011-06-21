@@ -860,6 +860,7 @@ public class ELMBT {
 	 * Wrapper method for getting number of bytes in the input buffer. 
 	 * We log errors if they occur. 
 	 * @return - the number of bytes waiting in the input buffer. 
+	 * TODO: .available() might not work on all devices so try using a bufferedReader and utilizing the boolean .available(). 
 	 */
 	public int inputBytesAvailable () {
 		int avail = 0; 
