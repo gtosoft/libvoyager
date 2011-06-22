@@ -82,15 +82,15 @@ public class AutoSessionAdapter {
 
         @Override
         public void onELMDeviceChosen(final String MAC) {
-        	new Thread() {
-        		public void run () {
-        			mgStats.incrementStat("sessionSetupCount");
-        			long startTime = EasyTime.getUnixTime();
-        			setupHSession(MAC);
-        			long stopTime = EasyTime.getUnixTime();
-        			mgStats.setStat("timeTosetupSession", stopTime - startTime);
-        		}
-        	}.start();
+//        	new Thread() {
+//        		public void run () {
+			mgStats.incrementStat("sessionSetupCount");
+			long startTime = EasyTime.getUnixTime();
+			setupHSession(MAC);
+			long stopTime = EasyTime.getUnixTime();
+			mgStats.setStat("timeTosetupSession", stopTime - startTime);
+//        		}
+//        	}.start();
         }
         
     };
