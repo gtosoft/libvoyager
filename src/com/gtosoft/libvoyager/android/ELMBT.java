@@ -7,6 +7,9 @@
 package com.gtosoft.libvoyager.android;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.UUID;
@@ -77,7 +80,8 @@ public class ELMBT {
 	BluetoothDevice 	mBTDevice 	= null; 
 	
 	// streams
-	BufferedInputStream mBTInputStream 	= null;
+//	BufferedInputStream mBTInputStream 	= null;
+	BufferedReader		mBTReader		= null;
 	//InputStream 		mBTInputStream  = null;
 	OutputStream 		mBTOutputStream = null;
 
@@ -184,7 +188,7 @@ public class ELMBT {
 			return false;
 		}
 
-		if (mBTInputStream == null) {
+		if (mBTReader == null) {
 //			msg ("Not connected: i.stream");
 			return false;
 		}
@@ -397,7 +401,8 @@ public class ELMBT {
 		
 		try {
 			mBTOutputStream = mBTSocket.getOutputStream();
-			mBTInputStream  = new BufferedInputStream (mBTSocket.getInputStream(),INPUT_BUFFER_SIZE);
+			//mBTInputStream  = new BufferedInputStream (mBTSocket.getInputStream(),INPUT_BUFFER_SIZE);
+			mBTReader = new BufferedReader(new InputStreamReader(mBTSocket.getInputStream()));
 			//msg ("Connecting non-buffered input stream...");
 			//mBTInputStream  = mBTSocket.getInputStream();
 		} catch (Exception e) {
@@ -420,9 +425,9 @@ public class ELMBT {
 		// do a quick thing that will kick the tool out of ATMA mode. also submitted hardware feature request to scantool.net for this. 
 		sendRaw("X");
 		
-		if (mBTInputStream != null) {
-			try {mBTInputStream.close();} catch (Exception e) {}
-			mBTInputStream = null;
+		if (mBTReader != null) {
+			try {mBTReader.close();} catch (Exception e) {}
+			mBTReader = null;
 		}
 		
 		if (mBTOutputStream != null) {
@@ -868,11 +873,14 @@ public class ELMBT {
 		// there ain't nothing there if we're not connected!
 		if (isConnected() == false)
 			return 0;
-		
-		try {avail = mBTInputStream.available();} catch (Exception e) {
+
+		try {
+			if (mBTReader.ready()) avail = 1; else avail = 0;
+		} catch (Exception e) {
 			msg ("IO_IN_ERR=" + e.getMessage());
 			ioErrorOccurredDuringInput();
 		}
+		
 		
 		return avail;
 	}
@@ -899,10 +907,15 @@ public class ELMBT {
 	 * @return
 	 */
 	public int getNumInputBytesBuffered () {
-		try {return mBTInputStream.available();
+		int avail = 0;
+		
+		try {
+			if (mBTReader.ready()) avail = 1; else avail = 0;
 		} catch (Exception e) {
-			return 0;
+			// silent error. we'll have other opportunities to see an io problem. 
 		}
+		
+		return avail;
 	}
 	
 	/**
@@ -996,8 +1009,8 @@ public class ELMBT {
 		
 		// convert the input buffer bytes, one-by-one, into a string, which we'll return. 
 		try {
-			while (mBTInputStream != null && mBTInputStream.available() > 0) {
-				thisByte = (char)mBTInputStream.read();
+			while (mBTReader != null && inputBytesAvailable() > 0) {
+				thisByte = (char)mBTReader.read();
 
 				//msg ("HALLALUGJAH THERE WAS A BYTE IN THE BUFFER!");
 				// for stats. 
@@ -1057,8 +1070,8 @@ public class ELMBT {
 		
 		// convert the input buffer bytes, one-by-one, into a string, which we'll return. 
 		try {
-			while (mBTInputStream != null && mBTInputStream.available() > 0 && sbuf.length() < 4096) {
-				thisByte = (char)mBTInputStream.read();
+			while (mBTReader != null && inputBytesAvailable() > 0 && sbuf.length() < 4096) {
+				thisByte = (char)mBTReader.read();
 
 				//msg ("HALLALUGJAH THERE WAS A BYTE IN THE BUFFER!");
 				// for stats. 
