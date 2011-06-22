@@ -3,9 +3,7 @@ package com.gtosoft.libvoyager.svip;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -22,7 +20,7 @@ import com.gtosoft.libvoyager.util.GeneralStats;
  */
 
 public class SVIPTCPClient {
-
+	boolean 		DEBUG = true;
 	Thread			mtMessagesAndState;
 	BufferedInputStream 	mInput;
 	OutputStream   	mOutput;
@@ -32,6 +30,10 @@ public class SVIPTCPClient {
 	EventCallback	mECBDPArrivedHandler;
 	EventCallback	mECBOOBArrivedHandler;
 	GeneralStats	mgStats = new GeneralStats();
+	String 			SERVER_NAME = "localhost";
+	int 			SERVER_PORT = 62009;
+	
+	
 	
 	/**
 	 * default constructor. 
@@ -79,6 +81,7 @@ public class SVIPTCPClient {
 					// if connected then get next message and process it (pass it to event handler or command-response handler). 
 					if (connected() == true) {
 						String thisMessage = getNextMessage ();
+						msg ("Got next message. len=" + thisMessage.length() + " msg=" + thisMessage);
 						if (thisMessage != null && thisMessage.length() > 0) {
 							processOneMessage (thisMessage);
 						} else {
@@ -90,6 +93,8 @@ public class SVIPTCPClient {
 						EasyTime.safeSleep(5000);
 					}  // end of "if we're NOT connected"
 				}// end of "loop while thread are on". 
+				msg ("Main-thread has exited. We'll now tear down the connection.");
+				tearDownConnection();
 			}// end of run()
 
 		};// end of thread definition. 
@@ -255,13 +260,19 @@ public class SVIPTCPClient {
 		// Are we already connected? 
 		if (mServerSocket == null || mServerSocket.isConnected() != true) {
 			// not connected, so try to connect. 
+			msg ("Trying to connect to server...");
+			mgStats.incrementStat("svip.connectToServer.attempts");
 			ret = tryToConnect();
+			if (DEBUG) msg ("connection returned " + ret);
 			if (ret) {
 				// successful connect! attach streams. 
 				msg ("Successful connect! attaching streams.");
 				ret = attachStreams();
 				if (ret) {
 					sendOOBEvent ("client.connected","");
+				} else {
+					// failed attempt to connect.
+					mgStats.incrementStat("svip.connectToServer.fails");
 				}
 			}// end of "if we just connected"
 		}// end of "if we need to connect"
@@ -292,18 +303,36 @@ public class SVIPTCPClient {
 	 * @return
 	 */
 	private boolean tryToConnect () {
-		SocketAddress remoteAddr = new InetSocketAddress("localhost", 62009);
+//		SocketAddress remoteAddr = new InetSocketAddress(SERVER_NAME, SERVER_PORT);
 		
-		try {
-			mServerSocket.connect(remoteAddr);
-		} catch (Exception e) {
-			msg ("Error connecting to server. E=" + e.getMessage());
-			return false;
+		if (mServerSocket == null) {
+			try {
+				mServerSocket = new Socket(SERVER_NAME, SERVER_PORT);
+				msg ("**** I think we just connected! server=" + SERVER_NAME);
+			} catch (Exception e) {
+				msg ("Error creating socket to server " + SERVER_NAME + "on port " + SERVER_PORT + " E=" + e.getMessage());
+				return false;
+			}
 		}
+		
+//		try {
+//			mServerSocket.connect(remoteAddr, 5000);
+//		} catch (Exception e) {
+//			msg ("Error connecting to server. E=" + e.getMessage());
+//			return false;
+//		}
 
 		return true;
 	}
 
+	/**
+	 * 
+	 * @return - returns our generalstats object, for assimilation by our parent. 
+	 */
+	public GeneralStats getStats () {
+		return mgStats;
+	}
+	
 	/**
 	 * @return - Returns true if we're connected to the server and ready to rock. false otherwise.
 	 */
@@ -315,5 +344,16 @@ public class SVIPTCPClient {
 		}
 		
 	}// end of connected definition. 
+
+	public void registerDPArrivedHandler (EventCallback e) {
+		mECBDPArrivedHandler = e;
+	}
+	
+	public void registerOOBArrivedHandler (EventCallback e) {
+		mECBOOBArrivedHandler = e;
+	}
+
+
+	
 	
 }// end of class. 

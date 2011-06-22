@@ -57,7 +57,7 @@ public class RoutineScan {
 
 
 					// If we're not connected, sleep a bit. If we're connected, then scan the DPNs!
-					if (mOBD.getCurrentState() < 40) {
+					if (mOBD.getCurrentState() < 40 || mDPNs == null || mDPNs.size() < 1) {
 						EasyTime.safeSleep(500);
 						continue;
 					} else {
@@ -65,10 +65,11 @@ public class RoutineScan {
 						requestAllDPNs();
 					}
 
-					
 					if (scanLoopDelay > 0) 
 						EasyTime.safeSleep(scanLoopDelay);
 					
+					// we shouldn't have to sleep here. find out what's going wrong causing this thing to sloop so crazy fast. 
+					EasyTime.safeSleep(100);
 				}// end of while. 
 			}// end of run().
 		};// end of mscanthread definition. 

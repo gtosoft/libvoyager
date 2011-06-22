@@ -129,7 +129,10 @@ public class SVIPTCPServer {
 				while (mThreadsOn == true) {
 					boolean ret;
 					ret = instantiateServerSocketIfNecessary();
-					if (!ret) mgStats.incrementStat("bind.fails");
+					if (!ret) {
+						mgStats.incrementStat("bind.fails");
+						EasyTime.safeSleep(10000);
+					}
 					
 					Socket sClient;
 					// Try and accept() a new connection. we block here if everything is OK in the network world. 

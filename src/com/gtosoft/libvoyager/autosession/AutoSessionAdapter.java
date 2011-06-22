@@ -170,7 +170,7 @@ public class AutoSessionAdapter {
 	EventCallback mOOBEventCallback = new EventCallback () {
 		@Override
 		public void onOOBDataArrived(String dataName, String dataValue) {
-			msg ("(event) OOB Message: " + dataName + "=" + dataValue);
+//			msg ("(event) OOB Message: " + dataName + "=" + dataValue);
 			
 			//  If the OOB message is that of the I/O layer just having connected, then kick off a Hybrid Session detection routine. 
 			//	If that is successful then move forward with setup
@@ -234,8 +234,8 @@ public class AutoSessionAdapter {
 	EventCallback mDPArrivedCallback = new EventCallback () {
 		@Override
 		public void onDPArrived(String DPN, String sDecodedData, int iDecodedData) {
-			msg ("(autoSession event)DP: " + DPN + "=" + sDecodedData);
-			sendOOBMessage("teststate", DPN + "=" + sDecodedData);
+//			msg ("(autoSession event)DP: " + DPN + "=" + sDecodedData);
+//			sendOOBMessage("teststate", DPN + "=" + sDecodedData);
 		}
 	};
 	
