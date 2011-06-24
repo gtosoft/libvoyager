@@ -603,7 +603,7 @@ public class HybridSession {
 		return ret;
 	}
 
-	private boolean isHardwareSWCAN() {
+	public boolean isHardwareSWCAN() {
 		
 		if (mHardwareInfo != null && mHardwareInfo.isHardwareSWCAN().equals("true")) {
 			return true;
@@ -672,6 +672,10 @@ public class HybridSession {
 		return sess_monitor;
 	}
 
+	public CommandSession getCommandSession () {
+		return sess_command;
+	}
+	
 	/**
 	 * returns true if the hardware supports sniffing. 
 	 * @return

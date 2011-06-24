@@ -171,6 +171,17 @@ public class MonitorSession {
 	}
 
 	/**
+	 * Returns true if we're configured for SWCAN interface. 
+	 * @return
+	 */
+	public boolean isDeviceSWCAN () {
+		if (mInterfaceType == INTERFACE_SWCAN) 
+			return true;
+		
+		return false;
+	}
+	
+	/**
 	 * Run this method to try and enter sniff state. There is no guarantee that
 	 * it will succeed.
 	 * 
@@ -566,7 +577,7 @@ public class MonitorSession {
 			// throw away characters leading up to the prompt.
 			// ebt.readUpToCharacter('>', 1);
 			if (DEBUG)
-				msg("Entering state to sniff.............");
+				msg("Entering state to sniff. SWCAN is " + isDeviceSWCAN());
 			int newstate = enterStateToSniff(false);
 			if (DEBUG)
 				msg("Attempt to enter sniff resulted in new state " + newstate

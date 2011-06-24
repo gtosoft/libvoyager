@@ -82,6 +82,7 @@ public class AutoSessionAdapter {
 
         @Override
         public void onELMDeviceChosen(final String MAC) {
+        	msg ("ELM Device has been chosen. MAC=" + MAC);
 //        	new Thread() {
 //        		public void run () {
 			mgStats.incrementStat("sessionSetupCount");
@@ -286,7 +287,7 @@ public class AutoSessionAdapter {
 	}
 	
 	private void msg (String m) {
-		Log.d("AutoSessionAdapter","[T=" + getThreadID() + "] " + m);
+		Log.d("AutoSessionAdapter",getThreadID() + " " + m);
 	}
 
     private String getThreadID () {

@@ -42,7 +42,7 @@ public class ELMBT {
 	int mTotalFailedConnects = 0;
 	int mTotalSuccessfulConnects = 0;
 	
-	final boolean DEBUG=false;
+	final boolean DEBUG=true;
 
 	final boolean USE_REFLECTION = false;
 	

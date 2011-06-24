@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import android.text.InputFilter.LengthFilter;
 import android.util.Log;
 
 import com.gtosoft.libvoyager.util.EasyTime;
@@ -81,7 +82,8 @@ public class SVIPTCPClient {
 					// if connected then get next message and process it (pass it to event handler or command-response handler). 
 					if (connected() == true) {
 						String thisMessage = getNextMessage ();
-						msg ("Got next message. len=" + thisMessage.length() + " msg=" + thisMessage);
+						if (thisMessage.length()>0) 
+							msg ("*****Got next message. len=" + thisMessage.length() + " msg=" + thisMessage);
 						if (thisMessage != null && thisMessage.length() > 0) {
 							processOneMessage (thisMessage);
 						} else {
