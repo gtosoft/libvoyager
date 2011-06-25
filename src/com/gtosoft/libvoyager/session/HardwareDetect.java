@@ -338,7 +338,7 @@ public class HardwareDetect {
 		
 		return true;
 	}
-
+	
 	
 	private boolean instantiateMonitorSession(boolean isSWCAN) {
 
@@ -346,7 +346,7 @@ public class HardwareDetect {
 		// don't re-instantiate.
 
 		if (sess_monitor != null) {
-			msg("Moni: Shutting down old instance of Monisession before instantiating new.");
+			msg("Moni: WARNING: Shutting down old instance of Monisession before instantiating new.");
 			sess_monitor._suspend();
 			sess_monitor.shutdown();
 			sess_monitor = null;

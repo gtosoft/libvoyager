@@ -52,7 +52,7 @@ import com.gtosoft.libvoyager.util.UnitConverter;
  */
 
 public class DashDB extends SQLiteOpenHelper {
-	final boolean DEBUG=false;
+	final boolean DEBUG=true;
 	
 	GeneralStats mgStats = new GeneralStats();
 	
@@ -70,14 +70,6 @@ public class DashDB extends SQLiteOpenHelper {
 	public static final int OBD_CACHEFIELD_MINVALUE 	= 5;
 	public static final int OBD_CACHEFIELD_MAXVALUE 	= 6;
 	
-//	dataPointName = uc.getDPN();
-//	dataShortName = uc.getShortName();
-//	formula 	  = uc.getformula();
-//	description	  = uc.getDescription();
-//	minValue 	  = uc.getMinValue();
-//	maxValue 	  = uc.getMaxValue();
-
-	
 	
 	// To store the network for which we're getting PID data for in passive mode.
 	// We store it so that we can tell if the caller has changed the network ID for which they are making requests. 
@@ -87,7 +79,7 @@ public class DashDB extends SQLiteOpenHelper {
 
 
 	public final static String DB_NAME = "dash.db";
-	public final static int DB_VERSION = 20;
+	public final static int DB_VERSION = 21;
 	// Version Changes: 
 	// 2 -> 3 - Added a bunch of OnStar data points, TPMS, Air Temp, speed, RPM.
 	// 3 -> 4 - Added a bunch of database schema and records to support standard OBD2 requests, as well as some "convbaseline" data for baselining the OBD2 converter methods.
@@ -106,7 +98,9 @@ public class DashDB extends SQLiteOpenHelper {
 	// 16 -> 17 - Adding shittons of passive datapoints.  
 	// 17 -> 18 - mode datapoints and fixes.
 	// 18 -> 19 - changed obdRequest a little bit in support of the new units - US/Metric conversion ability.
-	// 19 -> 20 - Added timestamp field to the profiles table. 
+	// 19 -> 20 - Added timestamp field to the profiles table.
+	// 20 -> 21 - Added more fields to tables to store more specific PIDs and CAN IDs 6/25/2011
+	
 	
 	// Used by the passive data notification logic. our method "getDPSForHDR" returns a string array where the Y indices are these fields. 
 	public static final int DPS_FIELD_SIGBYTES 	= 0; // significant bytes, if any. 
@@ -1006,6 +1000,8 @@ public class DashDB extends SQLiteOpenHelper {
 		
 		String sql = "SELECT proValue from profiles where proType=? and proSubType=? and proKey=?";
 		String sqlArgs[] = {proType, proSubType, proKey};
+		
+		if (DEBUG) msg ("Looking for profile record with this query: " + sql);
 		
 		Cursor c = null;
 

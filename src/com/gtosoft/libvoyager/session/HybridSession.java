@@ -532,8 +532,10 @@ public class HybridSession {
 					msg ("ERROR: command session not instantiated. ");
 				}
 				
-				if (sess_command != null) 
+				if (sess_command != null) {
 					sess_command.resume();
+					sess_command.wakeUpAllNetworks();
+				}
 				else {
 					return false;
 				}

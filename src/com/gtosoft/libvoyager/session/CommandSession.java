@@ -25,7 +25,7 @@ import com.gtosoft.libvoyager.util.GeneralStats;
 
 
 public class CommandSession {
-	final boolean DEBUG = false;
+	final boolean DEBUG = true;
 	
 	// A place to store stats. Collected by our upstream friends. 
 	GeneralStats mgStats = new GeneralStats();
@@ -45,6 +45,7 @@ public class CommandSession {
 	};
 
 	// A smaller set of commands, since PP's have already been programmed once. 
+	// WARNING: Do not mess with PP's here, as we may do that in a different place and then re-run these commands afterwards. 
 	private final String resumeCommands [] = {
             "ATWS",                         // reset chip so changes take effect
             "ATCAF1",                       // CAN auto-formatting on
@@ -622,5 +623,58 @@ public class CommandSession {
 			return false;
 		}
 	}
+
+
+
+	/**
+	 * 1. Switch to 11-bit transmit mode
+	 * 2. send "100 00" (header=100, data=00)
+	 * 3. Switch back to 29-bit transmit mode. 
+	 */
+	public void wakeUpAllNetworks() {
+		if (mhWorkerHandler != null) {
+			mhWorkerHandler.post(new Runnable () {
+				public void run () {
+					switchTo11BitTransmitMode();
+					sendWakeupAllNodes();
+					switchTo29BitTransmitMode();
+				}
+
+				});// end of post
+		}// end of "if worker handler isn't null"
+	}// end of "wake up all networks" command. 
+
+	
+	private boolean switchTo29BitTransmitMode() {
+		if (DEBUG) msg ("Switching transmit mode to SWCAN + 29-bit");
+		
+		if (!ebt.sendATInitialization(new String[] {"AT PP 2C SV C0"})) return false;
+		// warm-start the ELM chip, so the PP parameter change takes affect. Do this by running the resume command sequence, so we end up in a predictable state. 
+		if (!ebt.sendATInitialization(resumeCommands)) return false;
+		
+		return true;
+	}
+
+	private boolean sendWakeupAllNodes() {
+		String response;
+		
+		if (DEBUG) msg ("Setting headers and transmiting 11-bit wake-up message...");
+		// set the header to "100"
+		if (!ebt.sendATInitialization(new String[] {"AT SH 100"})) return false;
+		// Transmit a CAN message consisting of a single null character (we have to send at least one byte. If we could send zero bytes we would do that, since just the header "100" is needed).
+		response = ebt.sendOBDCommand("00");
+		if (DEBUG) msg ("wake-up message has been sent. Response was: " + response);
+		
+		return true;
+	}
+
+	private boolean switchTo11BitTransmitMode() {
+		if (DEBUG) msg ("Switching transmit mode to SWCAN + 29-bit");
+		if (!ebt.sendATInitialization(new String[] {"AT PP 2C SV 40"})) return false;
+		// warm-start the ELM chip, so the PP parameter change takes affect. Do this by running the resume command sequence, so we end up in a predictable state. 
+		if (!ebt.sendATInitialization(resumeCommands)) return false;
+		return true;
+	}
+
 	
 }// end of CommandSession Class. 
