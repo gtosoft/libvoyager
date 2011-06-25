@@ -77,10 +77,12 @@ public class HardwareDetect {
 	public HashMap<String,String> getCapabilities () {
 
 		lookupCapabilities();
-		
+
+		if (DEBUG) msg ("before any I/O, saved capabilities for this device are: SWCAN=" + isHardwareSWCAN() + " OBD=" + isOBD2Supported() + " MONI=" + isMoniSupported());
 		
 		// if OBD2 support is unknown then go figure it out. Otherwise we're good. 
-		if (isOBD2Supported().equals("unknown")) {
+		// NEW: DO NOT attempt OBD stuff if the adapter is SWCAN. 
+		if (isOBD2Supported().equals("unknown") && !isHardwareSWCAN().equals("true")) {
 			msg ("OBD2 capabilities are unknown asof yet. Please wait while we find out if device + vehicle supports OBD2.");
 			findOutIfOBDIsSupported();
 			// if OBD2 is supported, this leaves the question "is moni supported too?" - we'll answer that shortly. 
@@ -97,6 +99,7 @@ public class HardwareDetect {
 
 		// last thing - if OBD2 is supported, then we would like to know if moni is supported too!
 		if (isOBD2Supported().equals("true")) {
+			if (DEBUG) msg ("OBD is supported, so let's see if Moni is supported...");
 			findOutIfOBD2SupportsMoni();
 		}
 
@@ -512,11 +515,6 @@ public class HardwareDetect {
 		if (sess_monitor != null)	sess_monitor._suspend();
 		
 		
-//		// leave one of these two unsuspended based on what's supported. 
-//		if (!isOBD2Supported().equals("true") && sess_obd2 	  != null) sess_obd2._suspend();
-//		if (!isMoniSupported().equals("true") && sess_monitor != null) sess_monitor._suspend(); 
-		
-
 		
 	}
 
@@ -545,32 +543,6 @@ public class HardwareDetect {
 		mhmCapabilities.put(KEY_BLUETOOOTH_MAC, ebt.getPeerMAC());
 	}
 	
-//	/**
-//	 * Called internally.
-//	 */
-//	private void saveDetailedCapabilities() {
-//		// Save capabilities to persistant storage. 
-//		ddb.saveHashmapToStorage("HardwareCapabilities", "" + mhmCapabilities.get(KEY_OBD_RESPONSE), mhmCapabilities);
-//	}
-	
-//	/**
-//	 * Called internally.
-//	 */
-//	private void retrieveDetailedCapabilities() {
-//		HashMap<String,String> hmCaps = new HashMap<String,String> ();
-//		
-//		// If hardware is OBD2 and valid response, then use that response to pull in details hardware information into our hashmap. 
-//		if (isOBD2Supported().equals("true")) {
-//			// Retrieve hardware capabilities as related to the current vehicle. 
-//			hmCaps = ddb.restoreHashmapFromStorage("HardwareCapabilities", "" + mhmCapabilities.get(KEY_OBD_RESPONSE));
-//		
-//if (DEBUG) msg ("About to pull in capabilities details from storage. mhmcapabilities=" + getHashMapString (mhmCapabilities) + " fromProfiles=" + getHashMapString (hmCaps));
-//			hmCaps = mhmCapabilities;
-//			
-//			// Since OBD2 is supported, then SWCAN must NOT be supported. 
-//			mhmCapabilities.put(KEY_HW_IS_SWCAN, "false");
-//		}
-//	}
 
 	public static String getHashMapString (HashMap<String,String> hm) {
 		String ret = "";
@@ -591,8 +563,12 @@ public class HardwareDetect {
 	}
 	
 
-
-
+	/**
+	 * 6/25/2011 - this works. 
+	 * Sample DB records: 	3|HardwareCapabilities|HardwareSWCAN|00:18:E4:1D:28:31|false|1308881384
+	 * 						4|HardwareCapabilities|HardwareSWCAN|00:18:E4:1F:F6:2E|true|1309027016
+	 *
+	 */
 	private void saveSWCANTypeToDDB() {
 		ddb.setProfileValue(
 				"HardwareCapabilities", 
@@ -616,7 +592,6 @@ public class HardwareDetect {
 				);
 
 		if (DEBUG) msg ("Retrieved SWCAN support string from database, SWCANSupport=" + hardwareType); 
-
 		
 		// Take the value we just read from profile and put it in the capabilities hashmap. 
 		if (hardwareType.length() > 0) {
