@@ -80,9 +80,14 @@ public class HardwareDetect {
 
 		if (DEBUG) msg ("before any I/O, saved capabilities for this device are: SWCAN=" + isHardwareSWCAN() + " OBD=" + isOBD2Supported() + " MONI=" + isMoniSupported());
 		
+		// NEW: DO NOT attempt OBD stuff if the adapter is SWCAN. We do this by looking up SWCAN early on. 
+		if (isHardwareSWCAN().equals("true")) {
+			msg ("Hardware is SWCAN so we're setting OBD support to FALSE.");
+			mhmCapabilities.put(KEY_SUPPORTS_OBD,"false");
+		}
+		
 		// if OBD2 support is unknown then go figure it out. Otherwise we're good. 
-		// NEW: DO NOT attempt OBD stuff if the adapter is SWCAN. 
-		if (isOBD2Supported().equals("unknown") && !isHardwareSWCAN().equals("true")) {
+		if (isOBD2Supported().equals("unknown")) {
 			msg ("OBD2 capabilities are unknown asof yet. Please wait while we find out if device + vehicle supports OBD2.");
 			findOutIfOBDIsSupported();
 			// if OBD2 is supported, this leaves the question "is moni supported too?" - we'll answer that shortly. 
@@ -205,6 +210,7 @@ public class HardwareDetect {
 		ddb = d;
 
 		// write the peer's MAC to the capabilities hashmap. 
+		msg ("Initialized with MAC=" + ebt.getPeerMAC());
 		mhmCapabilities.put(KEY_BLUETOOOTH_MAC, ebt.getPeerMAC());
 		
 		// Look up the capabilities of the current device. 
@@ -459,7 +465,6 @@ public class HardwareDetect {
 			}
 			
 		}
-
 		
 	}
 

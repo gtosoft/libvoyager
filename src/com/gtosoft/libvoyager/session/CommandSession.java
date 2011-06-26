@@ -648,7 +648,7 @@ public class CommandSession {
 	private boolean switchTo29BitTransmitMode() {
 		if (DEBUG) msg ("Switching transmit mode to SWCAN + 29-bit");
 		
-		if (!ebt.sendATInitialization(new String[] {"AT PP 2C SV C0"})) return false;
+		if (!ebt.sendATInitialization(new String[] {"AT PP 2C SV 40"})) return false;
 		// warm-start the ELM chip, so the PP parameter change takes affect. Do this by running the resume command sequence, so we end up in a predictable state. 
 		if (!ebt.sendATInitialization(resumeCommands)) return false;
 		
@@ -663,14 +663,25 @@ public class CommandSession {
 		if (!ebt.sendATInitialization(new String[] {"AT SH 100"})) return false;
 		// Transmit a CAN message consisting of a single null character (we have to send at least one byte. If we could send zero bytes we would do that, since just the header "100" is needed).
 		response = ebt.sendOBDCommand("00");
+		response = ebt.sendOBDCommand("00");
+		if (!ebt.sendATInitialization(new String[] {"AT SH 621"})) return false;
+//		response = ebt.sendOBDCommand("01 7E");
+//		response = ebt.sendOBDCommand("00 7F");
+		response = ebt.sendOBDCommand("01 7F"); // lites up everything as far as I can tell.  
+		response = ebt.sendOBDCommand("01 02"); // Keyfob sets this network level upon press 
+		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
+		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
+		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
+		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
+		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
 		if (DEBUG) msg ("wake-up message has been sent. Response was: " + response);
 		
 		return true;
 	}
 
 	private boolean switchTo11BitTransmitMode() {
-		if (DEBUG) msg ("Switching transmit mode to SWCAN + 29-bit");
-		if (!ebt.sendATInitialization(new String[] {"AT PP 2C SV 40"})) return false;
+		if (DEBUG) msg ("Switching transmit mode to SWCAN + 11-bit");
+		if (!ebt.sendATInitialization(new String[] {"AT PP 2C SV C0"})) return false;
 		// warm-start the ELM chip, so the PP parameter change takes affect. Do this by running the resume command sequence, so we end up in a predictable state. 
 		if (!ebt.sendATInitialization(resumeCommands)) return false;
 		return true;

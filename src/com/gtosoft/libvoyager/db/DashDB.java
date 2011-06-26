@@ -957,7 +957,7 @@ public class DashDB extends SQLiteOpenHelper {
 		} else {
 			if (DEBUG==true) msg ("Existing record not found for K=" + proKey + " Inserting new profile record.");
 			recID = getWritableDatabase().insert("profiles", null, cv);
-			if (DEBUG) msg ("Profile record added: Type=" + proType + " subtype=" + proSubType + " K=" + proKey + " V=" + proValue);
+			if (DEBUG) msg ("Profile record added: Type=" + proType + " subtype=" + proSubType + " K=" + proKey + " V=" + proValue + " Record ID=" + recID);
 		}
 		
 		
