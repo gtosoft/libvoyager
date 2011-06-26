@@ -931,14 +931,17 @@ public class ELMBT {
 		// Higher numbers like 300 seem to result in about a throughput of 3 ELM commands per second. 
 		// value 100 results in: Like 10 ELM commands per second!
 		// value 50 results in: 
-		final int READ_INTERVAL = 50;
+		final int MIN_READ_INTERVAL = 10;
+		final int MAX_READ_INTERVAL = 300;
 		
 		long upTimeLimit = eTime.getUptimeSeconds() + READ_TIMEOUT;
 		
 		long TEMPTIMESTART = EasyTime.getUnixTime();
 
 		long timeLeft = 1;
+		int loopCount = 0;
 		while (mThreadsOn == true && !ret.endsWith("" + stopAtThisCharacter) && isConnected() != false) {
+			loopCount++;
 			timeLeft = upTimeLimit - eTime.getUptimeSeconds();
 
 			// tracking down bugs. 
@@ -947,13 +950,14 @@ public class ELMBT {
 				timeLeft = 0;
 			}
 			
-//			if (DEBUG) msg ("ReadUpToCharacter(): Loops=" + loops + " bytes=" + ret.length() + " timeLeft=" + (upTimeLimit - eTime.getUptimeSeconds()));
-
+			
 			// slow down the looping in the case when there is no data waiting in the buffer.
 			if (inputBytesAvailable() == 0) {
-//				if (DEBUG) msg ("NO data waiting in input buffer, sleeping, loops=" + loops + " timeleft=" + timeLeft);
-				// Sleep a bit, to slow down the looping. 
-				safeSleep(READ_INTERVAL);
+				if (loopCount < 100)
+					safeSleep(MIN_READ_INTERVAL);
+				else
+					safeSleep(MAX_READ_INTERVAL);
+				
 			}
 			
 			ret = ret + readInputBuffer(stopAtThisCharacter); 
