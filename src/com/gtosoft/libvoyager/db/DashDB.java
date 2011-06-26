@@ -52,7 +52,7 @@ import com.gtosoft.libvoyager.util.UnitConverter;
  */
 
 public class DashDB extends SQLiteOpenHelper {
-	final boolean DEBUG=true;
+	final boolean DEBUG=false;
 	
 	GeneralStats mgStats = new GeneralStats();
 	

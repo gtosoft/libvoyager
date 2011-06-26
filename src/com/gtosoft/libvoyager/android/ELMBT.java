@@ -83,6 +83,7 @@ public class ELMBT {
 	//InputStream 		mBTInputStream  = null;
 	OutputStream 		mBTOutputStream = null;
 
+
 	// if true, then if we are disconnected we try to reconnect every so often.
 	boolean	mReconnectIfDisconnected  = true;
 
@@ -273,7 +274,6 @@ public class ELMBT {
 		if (!ableToConnect())
 			return false;
 
-		
 		// if execution reaches this point then the stars have aligned, and conditions are appropriate for us to try to connect.
 		
 		// mark the timestamp when we last tried to connect(). 
@@ -480,9 +480,9 @@ public class ELMBT {
 
 		
 		// Check and see if the state is changed or the same state repeated...
-		if (mConnected == newConnectedState)
+		if (mConnected == newConnectedState) {
 			return;
-		else {
+		} else {
 			// state changed, so set the variable then execute the state change event
 			mConnected = newConnectedState;
 

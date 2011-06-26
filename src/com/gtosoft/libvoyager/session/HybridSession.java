@@ -59,7 +59,7 @@ public class HybridSession {
 	
 	int mDPNHits = 0;
 	
-	final boolean DEBUG = true;
+	final boolean DEBUG = false;
 
 	// used locally. Not just for threads, but for loops. When we shutdown() we
 	// set this false.

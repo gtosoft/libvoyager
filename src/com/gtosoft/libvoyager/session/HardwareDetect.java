@@ -36,6 +36,8 @@ import com.gtosoft.libvoyager.util.PIDDecoder;
 public class HardwareDetect {
 	boolean mThreadsOn = true;
 	private static final boolean DEBUG = true;
+
+	boolean mdetectionHasExecuted = false;
 	
 	HashMap<String,String> mhmCapabilities = new HashMap<String,String> ();
 
@@ -119,6 +121,9 @@ public class HardwareDetect {
 
 		msg ("Backing up DB...");
 		ddb.backupDB("HardwareDetect");
+
+		// and finally, set the flag that says detection has been executed. 
+		mdetectionHasExecuted = true;
 		
 		return mhmCapabilities;
 	}
@@ -616,6 +621,9 @@ public class HardwareDetect {
 	 * @return - returns true if hardware detection info is valid. false otherwise. 
 	 */
 	public boolean isDetectionValid() {
+		
+		if (mdetectionHasExecuted != true) 
+			return false;
 
 		if (isHardwareSWCAN().equals("true") || isOBD2Supported().equals("true"))
 			return true;

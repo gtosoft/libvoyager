@@ -665,15 +665,13 @@ public class CommandSession {
 		response = ebt.sendOBDCommand("00");
 		response = ebt.sendOBDCommand("00");
 		if (!ebt.sendATInitialization(new String[] {"AT SH 621"})) return false;
-//		response = ebt.sendOBDCommand("01 7E");
-//		response = ebt.sendOBDCommand("00 7F");
 		response = ebt.sendOBDCommand("01 7F"); // lites up everything as far as I can tell.  
 		response = ebt.sendOBDCommand("01 02"); // Keyfob sets this network level upon press 
-		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
-		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
-		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
-		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
-		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
+//		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
+//		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
+//		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
+//		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
+//		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
 		if (DEBUG) msg ("wake-up message has been sent. Response was: " + response);
 		
 		return true;
