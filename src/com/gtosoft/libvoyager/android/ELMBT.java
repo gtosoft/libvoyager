@@ -927,17 +927,15 @@ public class ELMBT {
 		
 		// maximum number of seconds we allow ourselves to spend waiting to see the prompt character. This may block the caller so keep it low. 
 		final int READ_TIMEOUT = maxWaitSeconds;
-		// If no data is waiting in the input buffer, pause this number of milliseconds. 
-		final int READ_INTERVAL = 300;
+		// If no data is waiting in the input buffer, pause this number of milliseconds.
+		// Higher numbers like 300 seem to result in about a throughput of 3 ELM commands per second. 
+		// value 100 results in: Like 10 ELM commands per second!
+		// value 50 results in: 
+		final int READ_INTERVAL = 50;
 		
 		long upTimeLimit = eTime.getUptimeSeconds() + READ_TIMEOUT;
 		
-		
 		long TEMPTIMESTART = EasyTime.getUnixTime();
-
-		
-		// print a useful message. 
-//		if (DEBUG) msg ("about to read bytes up to this character: " + stopAtThisCharacter + " buffer contains " + getNumInputBytesBuffered() + " bytes. Max wait seconds=" + maxWaitSeconds);
 
 		long timeLeft = 1;
 		while (mThreadsOn == true && !ret.endsWith("" + stopAtThisCharacter) && isConnected() != false) {
@@ -1267,10 +1265,7 @@ public class ELMBT {
 	 * @return - the MAC of the bluetooth peer device as found through discovery. 
 	 */
 	public String getPeerMAC() {
-		if (mBTDevice != null) 
-			return mBTDevice.getAddress();
-		else
-			return "";
+		return mPeerMAC;
 	}
 
 	/**
