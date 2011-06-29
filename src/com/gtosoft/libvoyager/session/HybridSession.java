@@ -534,7 +534,8 @@ public class HybridSession {
 				
 				if (sess_command != null) {
 					sess_command.resume();
-					sess_command.wakeUpAllNetworks();
+					// TODO: check the link and if there is no traffic, send a wake-up. 
+					//sess_command.wakeUpAllNetworks();
 				}
 				else {
 					return false;
