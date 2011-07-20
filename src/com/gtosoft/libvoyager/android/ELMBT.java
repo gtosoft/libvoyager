@@ -56,7 +56,7 @@ public class ELMBT {
 	int mMaxSuccessiveConnectFails = 30;
 
 	// minimum number of seconds that must elapse between two connect()'s. 
-	int MINIMUM_RECONNECT_PERIOD = 15;
+	int MINIMUM_RECONNECT_PERIOD = 3;
 
 	// maximum number of bytes to accept in the input buffer before we start blocking/dropping. 
 	final int INPUT_BUFFER_SIZE = 32767;
@@ -91,7 +91,7 @@ public class ELMBT {
 	Thread 	mtOverallStatus = null;
 	
 	// number of seconds between each overall-Status check.
-	int		mOASDelay = 15;
+//	int		mOASDelay = 15;
 	
 	// I/O error counters
 	int mErrorsIn 	= 0;
