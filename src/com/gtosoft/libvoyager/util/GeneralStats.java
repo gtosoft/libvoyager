@@ -64,6 +64,16 @@ public class GeneralStats {
 	}
 
 	/**
+	 * Convenience method. 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public HashMap<String,String> setStat (String key, double value) {
+		return setStat(key, "" + value);
+	}
+	
+	/**
 	 * Convenience method to set a long stat. 
 	 * @param key - stat key, think hierarchy. 
 	 * @param value - integer value to set that stat to. It will still be stored as a string. 

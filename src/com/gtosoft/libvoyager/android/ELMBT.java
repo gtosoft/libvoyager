@@ -227,18 +227,9 @@ public class ELMBT {
 		mtOverallStatus = new Thread() {
 			
 			public void run () {
-				boolean discoverInProgress = false;
 				while (mThreadsOn == true) {
 					// if appropriate, try to connect. 
 					if (isConnected() == false) connectIfAble();
-					
-					// handle BT Discovery state transitions
-					if (isDiscovering() != discoverInProgress) {
-						sendDiscoveryEvent (isDiscovering());
-						discoverInProgress = isDiscovering();
-					}
-
-					
 					
 					// take a nap. If we're interrupted, break out of the loop. 
 					if (EasyTime.safeSleep(STATUS_THREAD_UPDATE_INTERVAL) == false) break;
@@ -273,6 +264,13 @@ public class ELMBT {
 		}
 	}
 	
+	/**
+	 * Returns the number of connect retries remaining. Useful if we disconnect or are disconnected.
+	 * @return
+	 */
+	private int numRetriesRemaining() {
+		return mMaxSuccessiveConnectFails - mSuccessiveFailedConnects;
+	}
 	
 	/**
 	 * Are conditions right for us to connect? 
@@ -283,7 +281,7 @@ public class ELMBT {
 		if (mReconnectIfDisconnected != true)
 			return false;
 		
-		if (mSuccessiveFailedConnects > mMaxSuccessiveConnectFails)
+		if (numRetriesRemaining() == 0)
 			return false;
 
 		if (getTimeSinceLastConnect() < MINIMUM_RECONNECT_PERIOD) {
@@ -422,6 +420,7 @@ public class ELMBT {
 			mBTSocket.connect();
 		} catch (Exception e) {
 			msg ("connect(): Failed attempt number " + (mSuccessiveFailedConnects+1) + " of " + mMaxSuccessiveConnectFails + " while connecting to " + mPeerMAC + "(" + mBTDevice.getName() + "). Error was: " + e.getMessage());
+			sendOOBMessage(OOBMessageTypes.BLUETOOTH_FAILED_CONNECT, "" + numRetriesRemaining());
 			return false;
 			// there was a problem connecting... make a note of the particulars and move on. 
 		}
