@@ -11,6 +11,7 @@ import com.gtosoft.libvoyager.svip.SVIPTCPServer;
 import com.gtosoft.libvoyager.util.EasyTime;
 import com.gtosoft.libvoyager.util.EventCallback;
 import com.gtosoft.libvoyager.util.GeneralStats;
+import com.gtosoft.libvoyager.util.OOBMessageTypes;
 
 /**
  * 
@@ -176,7 +177,7 @@ public class AutoSessionAdapter {
 			//  If the OOB message is that of the I/O layer just having connected, then kick off a Hybrid Session detection routine. 
 			//	If that is successful then move forward with setup
 			//	If unsuccessful, then continuously re-try as long as bt remains connected.
-			if (dataName.equals(HybridSession.OOBMessageTypes.IO_STATE_CHANGE)) {
+			if (dataName.equals(OOBMessageTypes.IO_STATE_CHANGE)) {
 				if (dataValue.equals("0")) {
 					// Bluetooth just disconnected.
 					msg ("Bluetooth just disconnected.");
@@ -210,7 +211,7 @@ public class AutoSessionAdapter {
 				// TODO: Kick off hardware-type detection. Hopefully it can use cached data as necessary to speed up successive executions. 
 			}
 			
-			if (dataName.equals(HybridSession.OOBMessageTypes.AUTODETECT_SUMMARY)) {
+			if (dataName.equals(OOBMessageTypes.AUTODETECT_SUMMARY)) {
 				// TODO: Make sure autodetect was successful. If so, then move forward with the next step of being autonomous. 
 			}
 			

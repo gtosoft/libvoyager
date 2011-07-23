@@ -17,6 +17,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import com.gtosoft.libvoyager.util.OOBMessageTypes;
 import com.gtosoft.libvoyager.util.EasyTime;
 import com.gtosoft.libvoyager.util.EventCallback;
 import com.gtosoft.libvoyager.util.GeneralStats;
@@ -56,7 +57,7 @@ public class ELMBT {
 	int mMaxSuccessiveConnectFails = 30;
 
 	// minimum number of seconds that must elapse between two connect()'s. 
-	int MINIMUM_RECONNECT_PERIOD = 3;
+	int MINIMUM_RECONNECT_PERIOD = 1;
 
 	// maximum number of bytes to accept in the input buffer before we start blocking/dropping. 
 	final int INPUT_BUFFER_SIZE = 32767;
@@ -64,8 +65,8 @@ public class ELMBT {
 	// Max sequential Input or Output errors that can occur before we consider the connection DEAD. 
 	final int MAX_IO_ERRORS = 3;
 	
-	// Number of seconds to pause between each check to the status. 
-	final int STATUS_THREAD_UPDATE_INTERVAL = 5;
+	// Number of milliseconds to pause between loops of our main thread.  
+	final int STATUS_THREAD_UPDATE_INTERVAL = 1000;
 	
 	// Bluetooth MAC address of our peer. Provided to us by calling class via our constructor.  
 	String 	mPeerMAC 	= "";
@@ -113,7 +114,10 @@ public class ELMBT {
 	
 	EventCallback mMessageCallback = null;
 	EventCallback mStateChangeCallback = null;
+	// used to pass oob events up to a parent class. 
+	EventCallback mOOBArrivedCallback = null;
 
+	
 	// Stringbuilder, used ONLY by the IO Input reader. Defined here so that it doesn't have to get allocated each time. 
 	StringBuilder sbuf = new StringBuilder(INPUT_BUFFER_SIZE + 32);
 
@@ -223,12 +227,21 @@ public class ELMBT {
 		mtOverallStatus = new Thread() {
 			
 			public void run () {
+				boolean discoverInProgress = false;
 				while (mThreadsOn == true) {
 					// if appropriate, try to connect. 
 					if (isConnected() == false) connectIfAble();
 					
+					// handle BT Discovery state transitions
+					if (isDiscovering() != discoverInProgress) {
+						sendDiscoveryEvent (isDiscovering());
+						discoverInProgress = isDiscovering();
+					}
+
+					
+					
 					// take a nap. If we're interrupted, break out of the loop. 
-					if (EasyTime.safeSleep(1000) == false) break;
+					if (EasyTime.safeSleep(STATUS_THREAD_UPDATE_INTERVAL) == false) break;
 					
 				}// end of main while loop. 
 				
@@ -242,6 +255,24 @@ public class ELMBT {
 		return true;
 	}
 
+	/**
+	 * This gets kicked off if bluetooth discovery is observed to have started or ended. 
+	 * @param newDiscoveryState
+	 */
+	private void sendDiscoveryEvent (boolean newDiscoveryState) {
+		sendOOBMessage (OOBMessageTypes.DISCOVERING_STATE_CHANGE,"" + newDiscoveryState);
+	}
+
+	public void registerOOBCallback (EventCallback newOOBCallback) {
+		mOOBArrivedCallback = newOOBCallback;
+	}
+	
+	private void sendOOBMessage (String dataName, String dataValue) {
+		if (mOOBArrivedCallback != null) {
+			mOOBArrivedCallback.onOOBDataArrived(dataName, dataValue);
+		}
+	}
+	
 	
 	/**
 	 * Are conditions right for us to connect? 
@@ -504,7 +535,6 @@ public class ELMBT {
 			if (DEBUG) msg ("connectionStateChanged(): We just connected!");
 			resetErrorCounters();
 			mBytesIn = 0;
-			resendEventCallback();
 
 			// Collect a few initial stats. 
 			// Send this warmstart with retries, so we can clear the stream and get to a clean I/O state with no buffers or junk on the stream.
@@ -524,6 +554,15 @@ public class ELMBT {
 		mUTLastStateChange = eTime.getUptimeSeconds();
 		
 		// And finally, fire off the parent class' on-state-change event handler, if defined.  
+		sendStateChangeCallback();
+		
+		updateAllStats();
+	}
+
+	/**
+	 * Re-sends the last event, basically fires an event even though the state hasn't changed. 
+	 */
+	private void sendStateChangeCallback () {
 		try {
 			if (mStateChangeCallback != null) {
 				if (mConnected == true) {
@@ -535,25 +574,6 @@ public class ELMBT {
 		} catch (Exception e) {
 			msg ("!ebt_statechange e=" + e.getMessage());
 		}
-		
-		
-		updateAllStats();
-	}
-
-	/**
-	 * Re-sends the last event, basically fires an event even though the state hasn't changed. 
-	 */
-	private void resendEventCallback () {
-		
-		if (mStateChangeCallback != null) {
-			if (mConnected == true) {
-				mStateChangeCallback.onStateChange(1,1);
-			} else {
-				mStateChangeCallback.onStateChange(0,0);
-			}
-		}
-
-		updateAllStats();
 	}
 	
 	/**
@@ -572,13 +592,12 @@ public class ELMBT {
 		
 		// tell threads the party's over. 
 		mThreadsOn = false;
-
 		// Jolt the threads so they come out of any sleep they might be in. 
-		try {mtOverallStatus.interrupt();} catch (Exception e) {		}
+		cancelCurrentSleeps();
+
 		mtOverallStatus = null;
 		
 		eTime.shutdown();
-		
 	}
 
 	/**
@@ -617,8 +636,9 @@ public class ELMBT {
 	 * @param eventCallback - override onStateChange().
 	 */
 	public void registerStateChangeCallback (EventCallback eventCallback) {
-		if (mStateChangeCallback != null)
-			msg ("ERROR ERROR ERROR - ebt state change callback already registered. Blowing away last registration.");
+		if (mStateChangeCallback != null) {
+			if (DEBUG) msg ("ebt state-change callback re-registered");
+		}
 
 		
 		mStateChangeCallback = eventCallback;

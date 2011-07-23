@@ -152,7 +152,9 @@ public class CommandSession {
 		if (DEBUG) msg ("Session state changed from " + oldState + " to " + newState);
 		
 		if (oldState < STATE_READY && newState == STATE_READY) {
+			if (DEBUG) msg ("Playing Voyager V NOW!");
 			doVoyagerVMorseCode();
+			if (DEBUG) msg ("Played Voyager V.");
 		}
 		
 		if (mStateChangeCallback != null) {
@@ -164,8 +166,7 @@ public class CommandSession {
 	/**
 	 * This method sends a command to the network which invokes the audio system and plays a "V" in Morse code, representative of Voyager command session having successfully connected.
 	 */
-	public void 	doVoyagerVMorseCode() {
-
+	public void doVoyagerVMorseCode() {
 		// This may get executed by the state change method, in which case the global state has not yet been set to 40 but is in fact 100% ready. So in short, don't check the status here. 
 
 		// set headers for that which makes sound :)
@@ -175,8 +176,6 @@ public class CommandSession {
 		ebt.sendOBDCommand("84 10 03 60 00");
 		
 		/// <PAUSE>
-		// 550 is a good pause, and then we subtract 100ms to account for time it takes to send commands.
-//		EasyTime.safeSleep(550 - 100);
 		// 3/26/2011 having to decrease the delay between dits and dah, because with the current code, 450ms is noticably too long. Suspect the proguard obfuscator. 
 		EasyTime.safeSleep(550 - 100 - 175);
 

@@ -30,6 +30,7 @@ import android.app.Activity;
 public class ActivityHelper {
 	Context mctxParent = null;
 	EventCallback mOnELMDeviceChosenCallback = null;
+	private final boolean DEBUG = true;
 
 	/**
 	 * Default constructor - obtain context of the parent activity.
@@ -39,8 +40,6 @@ public class ActivityHelper {
 		mctxParent = ctxOfActivity;
 //		registerBroadcastReceivers();
 	}
-
-	private final boolean DEBUG = true;
 
 	/**
 	 * Registers all broadcast receivers. When adding broadcast receivers here,

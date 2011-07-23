@@ -3,7 +3,6 @@ package com.gtosoft.libvoyager.autosession;
 import android.util.Log;
 
 import com.gtosoft.libvoyager.session.HybridSession;
-import com.gtosoft.libvoyager.session.HybridSession.OOBMessageTypes;
 import com.gtosoft.libvoyager.util.EventCallback;
 import com.gtosoft.libvoyager.util.GeneralStats;
 import com.gtosoft.libvoyager.util.RoutineScan;

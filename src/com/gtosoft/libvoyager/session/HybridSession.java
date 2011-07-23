@@ -19,6 +19,7 @@ import com.gtosoft.libvoyager.db.DashDB;
 import com.gtosoft.libvoyager.util.EasyTime;
 import com.gtosoft.libvoyager.util.EventCallback;
 import com.gtosoft.libvoyager.util.GeneralStats;
+import com.gtosoft.libvoyager.util.OOBMessageTypes;
 import com.gtosoft.libvoyager.util.PIDDecoder;
 import com.gtosoft.libvoyager.util.RoutineScan;
 
@@ -33,18 +34,6 @@ import com.gtosoft.libvoyager.util.RoutineScan;
  */
 
 public class HybridSession {
-	public static class OOBMessageTypes {
-		// a long string with crlf's that describes the session detection results. 
-		public static final String AUTODETECT_SUMMARY = "AutodetectSummary";
-		// Corresponds to the new state of bluetooth, as returned by ebt.getcurrentstate()
-		public static final String IO_STATE_CHANGE = "IOStateChange";
-		// Corresponds to the new state of session layer (could be one or more sessions), as returned by obd2session.getcurrentstate()
-		public static final String SESSION_STATE_CHANGE = "SessionStateChange";
-		// corresponds to us changing from one session to another.
-		public static final String SESSION_SWITCHED = "SessionSwitched";
-		// ready state will be "0" or "1" depending on whether readiness is now false or true. 
-		public static final String READY_STATE_CHANGE = "ReadyStateChange";
-	};
 
 	HardwareDetect mHardwareInfo = null;
 	
@@ -291,6 +280,16 @@ public class HybridSession {
 		}
 	};
 
+	
+	EventCallback mLocalOOBHandler = new EventCallback () {
+		public void onOOBDataArrived(String dataName, String dataValue) {
+			// TODO: Do something based on the event?
+			
+			// retransmit it up the chain.
+			sendOOBMessage(dataName, dataValue);
+		}
+	};
+	
 
 	/**
 	 * Override onDPArrived method of EventCallback and register with us to get a call any time a DPN is decoded.
@@ -439,6 +438,7 @@ public class HybridSession {
 		if (ebt != null) {
 			ebt.registerMessageCallback(messageCallback);
 			ebt.registerStateChangeCallback(mecbIOStateChangeCallback);
+			ebt.registerOOBCallback(mLocalOOBHandler);
 		}
 
 		if (pd != null) {
