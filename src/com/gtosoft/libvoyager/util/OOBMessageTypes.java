@@ -10,12 +10,15 @@ public final class OOBMessageTypes {
 	public static final String SESSION_STATE_CHANGE = "SessionStateChange";
 	// corresponds to us changing from one session to another.
 	public static final String SESSION_SWITCHED = "SessionSwitched";
-	// ready state will be "0" or "1" depending on whether readiness is now false or true. 
+	// ready state will be "0" or "1" depending on whether readiness is now false or true.
 	public static final String READY_STATE_CHANGE = "ReadyStateChange";
 	// Bluetooth discovery started or stopped.
 	public static final String DISCOVERING_STATE_CHANGE = "DiscoveringStateChange";
 	
 	// Bluetooth failed connect occurred. Data should contain number of tries remaining. 
 	public static final String BLUETOOTH_FAILED_CONNECT = "BluetoothFailedConnect";
+	
+	// in case the service wants to tell of its state. state will be a string for now. 
+	public static final String SERVICE_STATE_CHANGE = "ServiceStateChange";
 	
 }

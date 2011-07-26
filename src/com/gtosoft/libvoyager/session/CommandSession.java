@@ -409,10 +409,11 @@ public class CommandSession {
 	
 	/**
 	 * synchronously (not in a separate thread thread) send the specified command. 
+	 * - Added synchronized keyword because the new I/O logic is extremely fast and causing us to send new commands before the prior has been seen. 
 	 * @param commandName
 	 * @return
 	 */
-	public boolean sendCommand_SYNC (String commandName) {
+	public synchronized boolean sendCommand_SYNC (String commandName) {
 		String response = "";
 		
 		if (ebt.isConnected() != true) {

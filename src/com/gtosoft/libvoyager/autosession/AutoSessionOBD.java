@@ -25,12 +25,12 @@ public class AutoSessionOBD {
 	GeneralStats	mgStats = new GeneralStats();
 	boolean DEBUG = true;
 	HybridSession 	hs;
-	EventCallback  	mOOBDataHandler = null;
+	EventCallback  	mParentOOBMessageHandler = null;
 	RoutineScan     rs;
 	
-	public AutoSessionOBD(HybridSession hsession,EventCallback OOBDataHandler) {
+	public AutoSessionOBD(HybridSession hsession,EventCallback newParentOOBMessageHandler) {
 		hs = hsession;
-		mOOBDataHandler = OOBDataHandler;
+		mParentOOBMessageHandler = newParentOOBMessageHandler;
 
 		// set session type to OBD. That's all we'll be doing here. 
 		hs.setActiveSession(HybridSession.SESSION_TYPE_OBD2);
@@ -50,10 +50,10 @@ public class AutoSessionOBD {
 	
 	
 	private void sendOOBMessage (String dataName, String dataValue) {
-		if (mOOBDataHandler == null)
+		if (mParentOOBMessageHandler == null)
 			return;
 
-		mOOBDataHandler.onOOBDataArrived(dataName, dataValue);
+		mParentOOBMessageHandler.onOOBDataArrived(dataName, dataValue);
 	}
 
 	private void msg (String m) {

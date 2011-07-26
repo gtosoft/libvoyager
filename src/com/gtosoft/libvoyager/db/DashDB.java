@@ -100,7 +100,7 @@ public class DashDB extends SQLiteOpenHelper {
 	// 18 -> 19 - changed obdRequest a little bit in support of the new units - US/Metric conversion ability.
 	// 19 -> 20 - Added timestamp field to the profiles table.
 	// 20 -> 21 - Added more fields to tables to store more specific PIDs and CAN IDs 6/25/2011
-	
+	// 21 -> 22 - Added a sleep in between FOB_STARTER commands. Needed to offset improved I/O throughput. 
 	
 	// Used by the passive data notification logic. our method "getDPSForHDR" returns a string array where the Y indices are these fields. 
 	public static final int DPS_FIELD_SIGBYTES 	= 0; // significant bytes, if any. 

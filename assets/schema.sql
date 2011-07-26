@@ -325,7 +325,7 @@ INSERT INTO "command" VALUES(4,'01','VOL_UNMUTE','10 0D 00 40 03 00; 10 0D 00 40
 INSERT INTO "command" VALUES(5,'01','FOB_LOCK','08 00 80 B0 02 01','Keyfob Lock Doors','4');
 INSERT INTO "command" VALUES(6,'01','FOB_UNLOCK','08 00 80 B0 02 02','Keyfob Unlock Driver Door','4');
 INSERT INTO "command" VALUES(7,'01','FOB_TRUNK','08 00 80 B0 02 04','Keyfob Trunk Open','4');
-INSERT INTO "command" VALUES(8,'01','FOB_STARTER','08 00 80 B0 02 01; 02 0C','Keyfob Remote Starter','4');
+INSERT INTO "command" VALUES(8,'01','FOB_STARTER','08 00 80 B0 02 01; S5; 02 0C','Keyfob Remote Starter','4');
 INSERT INTO "command" VALUES(9,'01','HEAT_SEAT_DRIVER','10 2A 00 99 04; 00; 00','Driver heated seat button','150');
 INSERT INTO "command" VALUES(10,'01','HEAT_SEAT_PASSENGER','10 2A 40 99 04; 00; 00','Passenger heated seat button','152');
 

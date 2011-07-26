@@ -22,6 +22,7 @@ import com.gtosoft.libvoyager.util.OOBMessageTypes;
  * try to detect the CAN network if one is present.  We'll also support muultiple interfaces
  * to the outside world such as TCP sockets (Command or Events). 
  *  
+ *  Also, autoSessionAdapter may instantiate one or more autosession{moni,obd,command} classes based on device capabilities. 
  */
 
 
@@ -42,8 +43,11 @@ public class AutoSessionAdapter {
 	AutoSessionOBD   mAutoOBD;
 
 	// This hands messages up the chain to our parent. These messages are of an "out of band" nature.  
-	EventCallback mOOBDataHandler = null;
+	EventCallback mParentOOBMessageHandler = null;
 
+	// the parent may want to register to receive Decoded DPNs as they are decoded. 
+	EventCallback mParentDPArrivedHandler = null;
+	
 	
 	/**
 	 * Default Constructor. 
@@ -51,17 +55,24 @@ public class AutoSessionAdapter {
 	 * @param serviceContext
 	 * @param btAdapter
 	 */
-	public AutoSessionAdapter(Context serviceContext, BluetoothAdapter btAdapter, EventCallback newOOBHandler) {
+	public AutoSessionAdapter(Context serviceContext, BluetoothAdapter btAdapter, EventCallback newParentOOBMessageHandler, EventCallback newParentDPArrivedHandler) {
 		mctxParentService = serviceContext;
 		mbtAdapter 		  = btAdapter;
-		registerOOBHandler(newOOBHandler);
+		registerOOBHandler(newParentOOBMessageHandler);
+		registerDPArrivedHandler (newParentDPArrivedHandler);
 		
+		// Do this right off the bat so it blocks other things from using the DB while it starts up (may include schema load).
 		msg ("Spinning up DB");
 		ddb = new DashDB(mctxParentService);
 		msg ("DB Ready.");
 
 		// Kicks off a BT Discovery or other way to "choose" a peer.
 		choosePeerDevice();
+	}
+
+	private void registerDPArrivedHandler( EventCallback newParentDPArrivedHandler) {
+		if (mParentDPArrivedHandler != null) if (DEBUG) msg ("Overwriting previous parent DP Arrived handler.");
+		mParentDPArrivedHandler = newParentDPArrivedHandler;
 	}
 
 	/**
@@ -84,15 +95,12 @@ public class AutoSessionAdapter {
         @Override
         public void onELMDeviceChosen(final String MAC) {
         	msg ("ELM Device has been chosen. MAC=" + MAC);
-//        	new Thread() {
-//        		public void run () {
 			mgStats.incrementStat("sessionSetupCount");
 			long startTime = EasyTime.getUnixTime();
+			// DO NOT do this in a separate thread. It took a long time to track down a bug where this was being started in a new thread.
 			setupHSession(MAC);
 			long stopTime = EasyTime.getUnixTime();
 			mgStats.setStat("timeTosetupSession", stopTime - startTime);
-//        		}
-//        	}.start();
         }
         
     };
@@ -114,19 +122,22 @@ public class AutoSessionAdapter {
 			mSVIPServer.shutdown();
 		} else {
 			// Instantiate the hybridsession. It will start by trying to connect ot the bluetooth peer. 
-			hs = new HybridSession(mbtAdapter, btAddr, ddb, mOOBEventCallback);
+			hs = new HybridSession(mbtAdapter, btAddr, ddb, mLocalOOBMessageHandler);
+			// Register to receive OOB messages from HS and its children. 
+			hs.registerOOBHandler(mLocalOOBMessageHandler);
+			hs.registerDPArrivedCallback(mLocalDPArrivedHandler);
 			
 			mSVIPServer = new SVIPTCPServer(hs);
 		}
 		
 		// Info/debug message handler.
-		hs.registerMsgCallback(mecbMsg);
+		hs.registerMsgCallback(mLocalMsgArrivedHandler);
 
 		// OOB messages coming from lower level classes
-		hs.registerOOBHandler(mOOBEventCallback);
+		hs.registerOOBHandler(mLocalOOBMessageHandler);
 		
 		// Register to be notified any time a datapoint is decoded. 
-		hs.registerDPArrivedCallback(mDPArrivedCallback);
+		hs.registerDPArrivedCallback(mLocalDPArrivedHandler);
 
 		if (DEBUG) hs.setRoutineScanDelay(1000);
 		
@@ -169,7 +180,7 @@ public class AutoSessionAdapter {
 	/**
 	 * This eventcallback will get executed (by Hybridsession) any time an out-of-band message is generated from any classes below us in the Voyager stack.
 	 */
-	EventCallback mOOBEventCallback = new EventCallback () {
+	EventCallback mLocalOOBMessageHandler = new EventCallback () {
 		@Override
 		public void onOOBDataArrived(String dataName, String dataValue) {
 //			msg ("(event) OOB Message: " + dataName + "=" + dataValue);
@@ -198,10 +209,12 @@ public class AutoSessionAdapter {
 								if (hs.getHardwareDetectData().isMoniSupported().equals("true") || hs.getHardwareDetectData().isHardwareSWCAN().equals("true")) { 
 									// Stars are aligned. Go moni.
 									// TODO: Don't necessary switch to moni right now unless the attached CAN network is SUPPORTED/RECOGNIZED.
-									mAutoMoni = new AutoSessionMoni (hs, mOOBEventCallback);
+									sendOOBMessage(OOBMessageTypes.SERVICE_STATE_CHANGE, "Moni supported. Entering moni.");
+									mAutoMoni = new AutoSessionMoni (hs, mLocalOOBMessageHandler);
 								} else {
 									// Fall back on OBD. 
-									mAutoOBD = new AutoSessionOBD(hs,mOOBEventCallback);
+									sendOOBMessage(OOBMessageTypes.SERVICE_STATE_CHANGE, "Moni not supported. Fallback on ODB");
+									mAutoOBD = new AutoSessionOBD(hs,mLocalOOBMessageHandler);
 								}
 							} 
 							
@@ -215,7 +228,7 @@ public class AutoSessionAdapter {
 				// TODO: Make sure autodetect was successful. If so, then move forward with the next step of being autonomous. 
 			}
 			
-			// Route it upwards. 
+			// Route it upwards (to the parent oob handler). 
 			sendOOBMessage(dataName, dataValue);
 		}
 	};
@@ -223,7 +236,7 @@ public class AutoSessionAdapter {
 	/**
 	 * This eventcallback will get executed (by Hybridsession) any time a debug/info message is generated by the code.   
 	 */
-	EventCallback mecbMsg = new EventCallback () {
+	EventCallback mLocalMsgArrivedHandler = new EventCallback () {
 		@Override
 		public void onNewMessageArrived(String message) {
 			msg ("(event)ASA: " + message);
@@ -233,11 +246,17 @@ public class AutoSessionAdapter {
 	/**
 	 * This eventcallback will get executed (by Hybridsession) any time a DP is decoded. 
 	 */
-	EventCallback mDPArrivedCallback = new EventCallback () {
+	EventCallback mLocalDPArrivedHandler = new EventCallback () {
 		@Override
 		public void onDPArrived(String DPN, String sDecodedData, int iDecodedData) {
-//			msg ("(autoSession event)DP: " + DPN + "=" + sDecodedData);
-//			sendOOBMessage("teststate", DPN + "=" + sDecodedData);
+			
+			// Pass the DP Arrived event to the SVIP Server, in case any clients are connected. 
+			if (mSVIPServer != null) mSVIPServer.sendDPArrived(DPN, sDecodedData);
+			
+			// Route it upwards! The parent has most likely registered to receive DPNs as they are decoded. So pass them along. 
+			if (mParentDPArrivedHandler != null) {
+				mParentDPArrivedHandler.onDPArrived(DPN, sDecodedData, iDecodedData);
+			}
 		}
 	};
 	
@@ -271,7 +290,7 @@ public class AutoSessionAdapter {
 	 * @param newOOBHandler
 	 */
 	public void registerOOBHandler (EventCallback newOOBHandler) {
-		mOOBDataHandler = newOOBHandler;
+		mParentOOBMessageHandler = newOOBHandler;
 	}
 
 	
@@ -281,10 +300,12 @@ public class AutoSessionAdapter {
 	 * @param dataValue
 	 */
 	private void sendOOBMessage (String dataName, String dataValue) {
-		if (mOOBDataHandler == null)
+		if (mParentOOBMessageHandler == null)
 			return;
 		
-		mOOBDataHandler.onOOBDataArrived(dataName, dataValue);
+		mParentOOBMessageHandler.onOOBDataArrived(dataName, dataValue);
+		
+		if (mSVIPServer != null) mSVIPServer.sendOOB(dataName, dataValue);
 	}
 	
 	private void msg (String m) {

@@ -202,6 +202,10 @@ public class SVIPTCPServer {
 	 * @param dataValue - data value for that oob. 
 	 */
 	public void sendOOB (String dataName, String dataValue) {
+		// Sanity check: are there any sockets open? 
+		if (mOpenSockets == null) return;
+		
+		
 		Iterator<SVIPStreamServer> i = mOpenSockets.iterator();
 		SVIPStreamServer s;
 		boolean ret;
@@ -222,7 +226,10 @@ public class SVIPTCPServer {
 	 * @param sDecodedData - decoded data. 
 	 */
 	public void sendDPArrived (String DPN, String sDecodedData) {
- 		Iterator<SVIPStreamServer> i = mOpenSockets.iterator();
+		// Sanity check: are there any sockets open? 
+		if (mOpenSockets == null) return;
+
+		Iterator<SVIPStreamServer> i = mOpenSockets.iterator();
 		SVIPStreamServer s;
 		boolean ret;
 		while (i.hasNext()) {
