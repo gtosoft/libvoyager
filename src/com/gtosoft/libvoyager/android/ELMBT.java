@@ -410,7 +410,7 @@ public class ELMBT {
 		// They say it is good to cancel discovery before connect, but does this cause us trouble if we try to connect to two different adapters at the same time? 
 		if (mBTAdapter.isDiscovering()) {
 			if (DEBUG) msg ("Cancelling active discovery session...");
-			mBTAdapter.cancelDiscovery();
+			cancelDiscovery();
 		}
 		
 		
@@ -442,6 +442,37 @@ public class ELMBT {
 		return true;
 	}
 	
+	/**
+	 * Cancels discovery session, if one is in progress. 
+	 * NOTE: Canceling a discovery actually takes a bit of time! like +/- 8 seconds. 
+	 */
+	public void cancelDiscovery() {
+		// is a discovery even in progress? 
+		if (! mBTAdapter.isDiscovering()) {
+			return;
+		}
+		
+		if (DEBUG) msg ("Cancelling discovery...");
+		
+		// send the official cancel signal. 
+		mBTAdapter.cancelDiscovery();
+
+		// Loop while we wait for discovery to cease. 
+		int x = 0;
+		while (mBTAdapter.isDiscovering() && x < 100) {
+			// testing: pause for two seconds to see if we can fix the issue where immediately after discovering a device, we have to try about 5-10 times to connect to it!
+			EasyTime.safeSleep(200);
+			x++;
+//			if (DEBUG) msg ("ELMBT loop# " + x + " waiting for discovery to end...");
+		}
+		
+		mGenStats.setStat("discovery.timeToCancel", "" + (x * 200) + "ms");
+		if (DEBUG) msg ("Cancel-Discovery operation blocked for " + (x*200) + "ms");
+		
+	}
+
+
+
 	/**
 	 * Reset input and output streams and make sure socket is closed. 
 	 * This method will be used during shutdown() to ensure that the connection is properly closed during a shutdown.  
@@ -1473,9 +1504,8 @@ public class ELMBT {
 		} catch (Exception e) {
 			msg ("ERROR while trying to check discovery status. E=" + e.getMessage());
 		}
-		
+
 		return x;
-		
 	}
 	
 }

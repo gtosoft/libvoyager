@@ -119,6 +119,7 @@ public class AutoSessionAdapter {
 		if (hs != null) {
 			msg ("WARNING: hs already set up. setting up again. ");
 			hs.shutdown();
+			msg ("WARNING: SVIP already set up. setting up again. ");
 			mSVIPServer.shutdown();
 		} else {
 			// Instantiate the hybridsession. It will start by trying to connect ot the bluetooth peer. 
