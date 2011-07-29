@@ -46,6 +46,9 @@ public class SVIPTCPServer {
 	 * Default Constructor. 
 	 */
 	public SVIPTCPServer(HybridSession h) {
+		if (DEBUG) msg ("----------------------------------------------------------------------SVIP TCP SERVER STARTUP. Started by ");
+		if (DEBUG) EasyTime.safeSleep(1000);
+		
 		hs = h;
 		// Start a thread that waits for new connections. 
 		startAcceptThread();

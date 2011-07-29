@@ -104,7 +104,8 @@ public class ServiceHelper {
 						msg ("ERROR: you forgot to register a ELMDeviceChosen callback! We found a device but can't do anything!");
 						return;
 					}
-					mOnELMDeviceChosenCallback.onELMDeviceChosen(device.getAddress());
+					// officially select this as our device. 
+					selectBTDevice(device.getAddress());
 				} else {
 					if (DEBUG)
 						msg("Throwing out bluetooth device with Name=" + device.getName() + " MAC=" + device.getAddress());
@@ -112,6 +113,15 @@ public class ServiceHelper {
 			}// end of "if it was a found action".
 		}// end of onReceive
 	};// end of our bluetooth discovery broadcast receiver method.
+	
+	/**
+	 * Call this method when we have selected a bluetooth device. 
+	 * Selection can be made by discovery or by connecting to the last known device. 
+	 * @param deviceMAC
+	 */
+	private void selectBTDevice(String deviceMAC) {
+		mOnELMDeviceChosenCallback.onELMDeviceChosen(deviceMAC);
+	}
 
 	private boolean startDiscovery() {
     	// Kicks off a discovery. 
@@ -144,9 +154,26 @@ public class ServiceHelper {
 		Log.d("ActivityHelper", m);
 	}
 
-	public void startDiscovering () {
-        startDiscovery();
+	/**
+	 * Chooses a device either by Bluetooth Discovery, or by selecting the last device we connected to.
+	 * This is typically the first stop for an outside class who wants us to kick off the connection process.
+	 */
+	public void chooseDevice () {
+		// TODO: Make a decision here whether to start discovery or to use a cached MAC. 
+		if (cachedDeviceMAC().length() > 0) {
+			// connect to cached device MAC. Likely the last device we connected to. 
+			selectBTDevice(cachedDeviceMAC());
+		} else {
+			// no cached device available. Let's discovery the device. 
+	        startDiscovery();
+		}
 	}
+	
+	// TODO: Return the MAC of the last device we connected to, or "" if none. 
+	private String cachedDeviceMAC() {
+		return "";
+	}
+	
 
 	public void shutdown () {
     	unregisterAllReceivers();

@@ -83,7 +83,7 @@ public class AutoSessionAdapter {
         
         msHelper.registerChosenDeviceCallback(chosenCallback);
 		// The discovery process should choose a single device and run setupHSession against it (via the chosenCallback). 
-        msHelper.startDiscovering();
+        msHelper.chooseDevice();
 	}
 	
     /** 
@@ -141,9 +141,6 @@ public class AutoSessionAdapter {
 		hs.registerDPArrivedCallback(mLocalDPArrivedHandler);
 
 		if (DEBUG) hs.setRoutineScanDelay(1000);
-		
-		mSVIPServer = new SVIPTCPServer(hs);
-		
 		
 		return true;
 	}

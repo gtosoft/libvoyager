@@ -41,7 +41,7 @@ public class ELMBT {
 	int mTotalFailedConnects = 0;
 	int mTotalSuccessfulConnects = 0;
 	
-	final boolean DEBUG=true;
+	final boolean DEBUG=false;
 
 	final boolean USE_REFLECTION = false;
 	
@@ -281,7 +281,7 @@ public class ELMBT {
 		if (mReconnectIfDisconnected != true)
 			return false;
 		
-		if (numRetriesRemaining() == 0)
+		if (numRetriesRemaining() < 1)
 			return false;
 
 		if (getTimeSinceLastConnect() < MINIMUM_RECONNECT_PERIOD) {
