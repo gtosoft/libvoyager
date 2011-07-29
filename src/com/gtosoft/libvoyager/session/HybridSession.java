@@ -636,7 +636,13 @@ public class HybridSession {
 	 * @param newOOBHandler
 	 */
 	public void registerOOBHandler (EventCallback newOOBHandler) {
+		if (mOOBDataHandler != null) {
+			if (DEBUG) msg ("HS - overwriting existing OOB data handler");
+		}
+		
 		mOOBDataHandler = newOOBHandler;
+		
+		if (DEBUG) mOOBDataHandler.onOOBDataArrived("special message from hybridsession", "blahbittyblah");
 	}
 
 	public String getAllStatsAsString () {

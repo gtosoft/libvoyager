@@ -22,16 +22,16 @@ import com.gtosoft.libvoyager.util.GeneralStats;
 public class AutoSessionMoni {
 	
 	GeneralStats	mgStats = new GeneralStats();
-	EventCallback	mParentOOBMessageHandler = null;
+//	EventCallback	mParentOOBMessageHandler = null;
 	HybridSession	hs = null;
 	
 
 	/**
 	 * Default constructor. 
 	 */
-	public AutoSessionMoni(HybridSession hsession,EventCallback newParentOOBMessageHandler) {
+	public AutoSessionMoni(HybridSession hsession) {
 		hs = hsession;
-		mParentOOBMessageHandler = newParentOOBMessageHandler;
+//		mParentOOBMessageHandler = newParentOOBMessageHandler;
 
 		// set session type to OBD. That's all we'll be doing here.
 		hs.setActiveSession(HybridSession.SESSION_TYPE_MONITOR);
@@ -44,12 +44,12 @@ public class AutoSessionMoni {
 		return mgStats;
 	}
 	
-	private void sendOOBMessage (String dataName, String dataValue) {
-		if (mParentOOBMessageHandler == null)
-			return;
-
-		mParentOOBMessageHandler.onOOBDataArrived(dataName, dataValue);
-	}
+//	private void sendOOBMessage (String dataName, String dataValue) {
+//		if (mParentOOBMessageHandler == null)
+//			return;
+//
+//		mParentOOBMessageHandler.onOOBDataArrived(dataName, dataValue);
+//	}
 
 	private void msg (String m) {
 		Log.d("AutoSessionOBD",m);

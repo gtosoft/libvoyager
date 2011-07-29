@@ -21,7 +21,7 @@ import android.util.Log;
  * 
  */
 public class MonitorSession {
-	final boolean DEBUG = true;
+	final boolean DEBUG = false;
 
 	// A place to store stats. Collected by our upstream friends.
 	GeneralStats mgStats = new GeneralStats();
@@ -254,12 +254,10 @@ public class MonitorSession {
 			// may block for a few seconds if necessary to collect enough
 			// packets.
 			if (isDataClean() != true) {
-				if (DEBUG) msg("Connection is not clean. Killing Monitor session altogether. ");
-				
-				if (DEBUG) msg ("Kamakazee bypassed.");
-				
+//				if (DEBUG) msg("Connection is not clean. Killing Monitor session altogether. ");
+//				if (DEBUG) msg ("Kamakazee bypassed.");
 //				_suspend();
-				if (DEBUG) msg("Kamakaze suspend thread finished.");
+//				if (DEBUG) msg("Kamakaze suspend thread finished.");
 				
 				return STATE_UNINITIALIZED;
 			}

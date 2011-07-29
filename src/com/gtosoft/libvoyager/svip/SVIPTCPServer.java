@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import android.util.Log;
 
-import com.gtosoft.libvoyager.session.HybridSession;
 import com.gtosoft.libvoyager.util.EasyTime;
 import com.gtosoft.libvoyager.util.GeneralStats;
 
@@ -26,7 +26,7 @@ import com.gtosoft.libvoyager.util.GeneralStats;
 
 public class SVIPTCPServer {
 	GeneralStats mgStats = new GeneralStats();
-	final boolean DEBUG = true;
+	final boolean DEBUG = false;
 	// libvoyager started in 2009. Seems like a good port. 
 	public static final int SVIP_SERVER_PORT = 62009;
 	Thread mtAcceptThread;
@@ -35,9 +35,9 @@ public class SVIPTCPServer {
 	BufferedInputStream mInStream;
 	OutputStream mOutStream;
 	
-	List<SVIPStreamServer> mOpenSockets;
+	List<SVIPStreamServer> mOpenSockets = new ArrayList<SVIPStreamServer>();
 
-	HybridSession hs;
+//	HybridSession hs;
 	
 	ServerSocket mServerSocket;
 	
@@ -45,11 +45,11 @@ public class SVIPTCPServer {
 	/**
 	 * Default Constructor. 
 	 */
-	public SVIPTCPServer(HybridSession h) {
-		if (DEBUG) msg ("----------------------------------------------------------------------SVIP TCP SERVER STARTUP. Started by ");
-		if (DEBUG) EasyTime.safeSleep(1000);
+	public SVIPTCPServer() {
+		if (DEBUG) msg ("----------------------------------------------------------------------SVIP TCP SERVER STARTUP.");
+//		if (DEBUG) EasyTime.safeSleep(1000);
 		
-		hs = h;
+//		hs = h;
 		// Start a thread that waits for new connections. 
 		startAcceptThread();
 	}
@@ -137,27 +137,8 @@ public class SVIPTCPServer {
 						EasyTime.safeSleep(10000);
 					}
 					
-					Socket sClient;
 					// Try and accept() a new connection. we block here if everything is OK in the network world. 
-					try {
-						sClient = mServerSocket.accept();
-						if (sClient.isConnected() == true) {
-							mgStats.incrementStat("accept.count");
-							// nodelay - to reduce latency. 
-							sClient.setTcpNoDelay(true);
-							// set a couple options to help keep the connection alive, even if it's not under heavy use.
-							sClient.setSoLinger(false, 300);
-							sClient.setKeepAlive(true);
-							
-							// pass the client onto the stream handler which manages the connection via streams.
-							addOpenSocket(sClient);
-							// TODO: Obtain peer's IP and put it in GenStats. 
-						} else {
-							msg ("Received a connect but the connection was not connected... wtf");
-						}
-					} catch (Exception e) {
-						// Not a big deal - the socket.accept method failed, which probably means the server socket isn't properly bound. we'll try again in a second when we loop.  
-					}
+					acceptNextConnection();
 
 					// if we loop, keep it slow. We could be looping trying to get a valid server socket. 
 					EasyTime.safeSleep(1000);
@@ -170,6 +151,30 @@ public class SVIPTCPServer {
 		mtAcceptThread.start();
 		
 		return true;
+	}
+
+	private void acceptNextConnection() {
+		Socket sClient;
+		try {
+			sClient = mServerSocket.accept();
+			if (sClient.isConnected() == true) {
+				mgStats.incrementStat("accept.count");
+				// nodelay - to reduce latency. 
+				sClient.setTcpNoDelay(true);
+				// set a couple options to help keep the connection alive, even if it's not under heavy use.
+				sClient.setSoLinger(false, 300);
+				sClient.setKeepAlive(true);
+				
+				// pass the client onto the stream handler which manages the connection via streams.
+				addOpenSocket(sClient);
+				// TODO: Obtain peer's IP and put it in GenStats. 
+			} else {
+				msg ("Received a connect but the connection was not connected... wtf");
+			}
+		} catch (Exception e) {
+			// Not a big deal - the socket.accept method failed, which probably means the server socket isn't properly bound. we'll try again in a second when we loop.  
+		}
+
 	}
 	
 	/**
@@ -191,12 +196,13 @@ public class SVIPTCPServer {
 		}
 		
 		// Instantiate the new SVIP Stream server. 
-		SVIPStreamServer s = new SVIPStreamServer(hs, b, outStream);
+		SVIPStreamServer s = new SVIPStreamServer(b, outStream);
 
 		// Add this new stream server to the list to make it official. 
+		if (DEBUG) msg ("SVIP Server sees client and is adding it to the set. size is " + mOpenSockets.size());
 		mOpenSockets.add(s);
 		
-		if (DEBUG) msg ("Added new stream to open socekts list!");
+		if (DEBUG) msg ("Added new stream to open socekts list! size is now " + mOpenSockets.size());
 	}
 	
 	/**
@@ -205,15 +211,19 @@ public class SVIPTCPServer {
 	 * @param dataValue - data value for that oob. 
 	 */
 	public void sendOOB (String dataName, String dataValue) {
+//if (DEBUG) msg ("SVIP HAS BEEN SUMMONED TO SEND THE FOLLOWING OOB MESSAGE " + dataName + "=" + dataValue);
 		// Sanity check: are there any sockets open? 
-		if (mOpenSockets == null) return;
-		
+		if (mOpenSockets == null) {
+			// no clients are connected to send message to?
+			return;
+		}
 		
 		Iterator<SVIPStreamServer> i = mOpenSockets.iterator();
 		SVIPStreamServer s;
 		boolean ret;
 		while (i.hasNext()) {
 			s = i.next();
+//if (DEBUG) msg ("SENDING TCP OOB MESSAGE " + dataName + "/" + dataValue);
 			ret = s.sendOOB(dataName, dataValue);
 			// if it failed, then remove that socket from the list. 
 			if (!ret) {
@@ -240,6 +250,7 @@ public class SVIPTCPServer {
 			ret = s.sendDPArrived(DPN, sDecodedData);
 			// if it failed, then remove that socket from the list. 
 			if (!ret) {
+				msg ("Removing dead network client.");
 				removeDeadSocket (s);
 				break;
 			}// end of "if the send failed, then close the socket". 

@@ -82,8 +82,8 @@ public class SVIPTCPClient {
 					// if connected then get next message and process it (pass it to event handler or command-response handler). 
 					if (connected() == true) {
 						String thisMessage = getNextMessage ();
-						if (thisMessage.length()>0) 
-							msg ("*****Got next message. len=" + thisMessage.length() + " msg=" + thisMessage);
+//						if (thisMessage.length()>0) 
+//							msg ("*****Got next message. len=" + thisMessage.length() + " msg=" + thisMessage);
 						if (thisMessage != null && thisMessage.length() > 0) {
 							processOneMessage (thisMessage);
 						} else {
@@ -174,7 +174,7 @@ public class SVIPTCPClient {
 		}
 
 		// Is it a new datapoint data? 
-		if (theMessage.startsWith("DPDATA")) {
+		if (theMessage.startsWith("DPN_ARRIVED")) {
 			processDPDataMessage (theMessage);
 			return true;
 		}

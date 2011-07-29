@@ -27,7 +27,7 @@ import com.gtosoft.libvoyager.util.OOBMessageTypes;
 
 
 public class AutoSessionAdapter {
-	final boolean DEBUG = true;
+	final boolean DEBUG = false;
 	HybridSession	 hs; 					// hybrid session is the top of the libVoyager pyramid. it manages everything else. 
 	Context			 mctxParentService;		// a reference to the parent context so that we can do things like work with Bluetooth. 
 	BluetoothAdapter mbtAdapter;
@@ -113,7 +113,7 @@ public class AutoSessionAdapter {
 	 * do a hardware detection routine. 
 	 */
 	private synchronized boolean setupHSession (String btAddr) {
-	   	mgStats.incrementStat ("session.setupcount");
+	   	mgStats.incrementStat ("session.setupCount");
 
 	   	// If HS is null this is the initial connect. Otherwise it's a reconnection. 
 		if (hs != null) {
@@ -121,25 +121,20 @@ public class AutoSessionAdapter {
 			hs.shutdown();
 			msg ("WARNING: SVIP already set up. setting up again. ");
 			mSVIPServer.shutdown();
-		} else {
-			// Instantiate the hybridsession. It will start by trying to connect ot the bluetooth peer. 
-			hs = new HybridSession(mbtAdapter, btAddr, ddb, mLocalOOBMessageHandler);
-			// Register to receive OOB messages from HS and its children. 
-			hs.registerOOBHandler(mLocalOOBMessageHandler);
-			hs.registerDPArrivedCallback(mLocalDPArrivedHandler);
-			
-			mSVIPServer = new SVIPTCPServer(hs);
-		}
+		} 
 		
-		// Info/debug message handler.
-		hs.registerMsgCallback(mLocalMsgArrivedHandler);
-
-		// OOB messages coming from lower level classes
+		// Instantiate the hybridsession. It will start by trying to connect ot the bluetooth peer. 
+		hs = new HybridSession(mbtAdapter, btAddr, ddb, mLocalOOBMessageHandler);
+		// Register to receive OOB messages from HS and its children. 
 		hs.registerOOBHandler(mLocalOOBMessageHandler);
-		
 		// Register to be notified any time a datapoint is decoded. 
 		hs.registerDPArrivedCallback(mLocalDPArrivedHandler);
-
+		// Info/debug message handler.
+		hs.registerMsgCallback(mLocalMsgArrivedHandler);
+		
+		// bind to our port. Later, we'll pass events to it so it can send them to its clients. 
+		mSVIPServer = new SVIPTCPServer();
+		
 		if (DEBUG) hs.setRoutineScanDelay(1000);
 		
 		return true;
@@ -197,29 +192,9 @@ public class AutoSessionAdapter {
 					// Bluetooth just connected!
 					sendOOBMessage("ebt.donetrying", "false");
 					msg ("Bluetooth just connected. kicking off config thread. ");
-					new Thread() {
-						public void run () {
-							setCurrentStateMessage("BT Connected. Configuring...");
-							boolean success = discoverNetwork();
-							if (success == true) {
-								setCurrentStateMessage("Network configured.");
-								// Set up a home session here. the home session will handle main processing of whichever type connection we have.
-								if (hs.getHardwareDetectData().isMoniSupported().equals("true") || hs.getHardwareDetectData().isHardwareSWCAN().equals("true")) { 
-									// Stars are aligned. Go moni.
-									// TODO: Don't necessary switch to moni right now unless the attached CAN network is SUPPORTED/RECOGNIZED.
-									sendOOBMessage(OOBMessageTypes.SERVICE_STATE_CHANGE, "Moni supported. Entering moni.");
-									mAutoMoni = new AutoSessionMoni (hs, mLocalOOBMessageHandler);
-								} else {
-									// Fall back on OBD. 
-									sendOOBMessage(OOBMessageTypes.SERVICE_STATE_CHANGE, "Moni not supported. Fallback on ODB");
-									mAutoOBD = new AutoSessionOBD(hs,mLocalOOBMessageHandler);
-								}
-							} 
-							
-						}
-					}.start();
+					// Kick off hardware-type detection. Hopefully it can use cached data as necessary to speed up successive executions. 
+					startBluetoothConfigThread();
 				}
-				// TODO: Kick off hardware-type detection. Hopefully it can use cached data as necessary to speed up successive executions. 
 			}
 			
 			if (dataName.equals(OOBMessageTypes.AUTODETECT_SUMMARY)) {
@@ -231,6 +206,36 @@ public class AutoSessionAdapter {
 		}
 	};
 
+	/**
+	 * Kick off an asynchronous thread which performs the hardware detection via hybridsession. 
+	 * @return - true if the thread was started successfully. 
+	 */
+	private boolean startBluetoothConfigThread() {
+		new Thread() {
+			public void run () {
+				setCurrentStateMessage("BT Connected. Configuring...");
+				boolean success = discoverNetwork();
+				if (success == true) {
+					setCurrentStateMessage("Network configured.");
+					// Set up a home session here. the home session will handle main processing of whichever type connection we have.
+					if (hs.getHardwareDetectData().isMoniSupported().equals("true") || hs.getHardwareDetectData().isHardwareSWCAN().equals("true")) { 
+						// Stars are aligned. Go moni.
+						// TODO: Don't necessary switch to moni right now unless the attached CAN network is SUPPORTED/RECOGNIZED.
+						sendOOBMessage(OOBMessageTypes.SERVICE_STATE_CHANGE, "Moni supported. Entering moni.");
+						mAutoMoni = new AutoSessionMoni (hs);
+					} else {
+						// Fall back on OBD. 
+						sendOOBMessage(OOBMessageTypes.SERVICE_STATE_CHANGE, "Moni not supported. Fallback on ODB");
+						mAutoOBD = new AutoSessionOBD(hs,mLocalOOBMessageHandler);
+					}
+				} 
+				
+			}
+		}.start();
+
+		return true;
+	}
+	
 	/**
 	 * This eventcallback will get executed (by Hybridsession) any time a debug/info message is generated by the code.   
 	 */
@@ -252,9 +257,7 @@ public class AutoSessionAdapter {
 			if (mSVIPServer != null) mSVIPServer.sendDPArrived(DPN, sDecodedData);
 			
 			// Route it upwards! The parent has most likely registered to receive DPNs as they are decoded. So pass them along. 
-			if (mParentDPArrivedHandler != null) {
-				mParentDPArrivedHandler.onDPArrived(DPN, sDecodedData, iDecodedData);
-			}
+			sendDPArrivedMessage(DPN, sDecodedData);
 		}
 	};
 	
@@ -298,13 +301,37 @@ public class AutoSessionAdapter {
 	 * @param dataValue
 	 */
 	private void sendOOBMessage (String dataName, String dataValue) {
-		if (mParentOOBMessageHandler == null)
-			return;
+		if (mParentOOBMessageHandler != null) {
+			mParentOOBMessageHandler.onOOBDataArrived(dataName, dataValue);
+		} else if (DEBUG) msg ("Parent OOB NOT YET DEFINED - NOT SENDING OOB MESSAGE TO parent " + dataName + "/" + dataValue);
 		
-		mParentOOBMessageHandler.onOOBDataArrived(dataName, dataValue);
-		
-		if (mSVIPServer != null) mSVIPServer.sendOOB(dataName, dataValue);
+		if (mSVIPServer != null) {
+			mSVIPServer.sendOOB(dataName, dataValue);
+		} else {
+			if (DEBUG) msg ("SVIP NOT YET DEFINED - NOT SENDING OOB MESSAGE TO SVIP " + dataName + "/" + dataValue);
+		}
 	}
+
+	/**
+	 * This method shall be used to pass datapoint data to the next level - SVIP. 
+	 * @param DPN - datapoint name
+	 * @param sDecodedData - decoded data in string format. 
+	 */
+	private void sendDPArrivedMessage (String DPN, String sDecodedData) {
+
+		// pass the message to our parent class
+		if (mParentDPArrivedHandler != null) {
+			// TODO: is it ok that we're passing a "0" here? 
+			mParentDPArrivedHandler.onDPArrived(DPN, sDecodedData, 0);
+		}
+
+		// pass the message to SVIP - connected TCP clients. 
+		if (mSVIPServer != null) {
+			mSVIPServer.sendDPArrived(DPN, sDecodedData);
+		}
+
+	}
+	
 	
 	private void msg (String m) {
 		Log.d("AutoSessionAdapter",getThreadID() + " " + m);

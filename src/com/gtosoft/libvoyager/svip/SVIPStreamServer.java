@@ -24,13 +24,13 @@ public class SVIPStreamServer {
 	// this String will contain partial message as we read them from the input buffer. 
 	String mCurrentMessage = "";
 
-	final boolean DEBUG = true;
+	final boolean DEBUG = false;
 	boolean mThreadsOn = true;
 	Thread mtCommandHandler;
 
 	BufferedInputStream mInStream;
 	OutputStream mOutStream;
-	HybridSession hs;
+//	HybridSession hs;
 
 	/**
 	 * Default Constructor. To instantiate this class you must have an open
@@ -40,9 +40,8 @@ public class SVIPStreamServer {
 	 * @param bufferedInputStream - buffered inputstream that we will read from
 	 * @param outStream - an output stream, which we will send responses to.
 	 */
-	public SVIPStreamServer(HybridSession hsession,
-			BufferedInputStream bufferedInputStream, OutputStream outStream) {
-		hs = hsession;
+	public SVIPStreamServer(BufferedInputStream bufferedInputStream, OutputStream outStream) {
+//		hs = hsession;
 		mInStream = bufferedInputStream;
 		mOutStream = outStream;
 
@@ -309,8 +308,7 @@ public class SVIPStreamServer {
 		// Append the message terminator to complete the packet.
 		packet = packet + ">";
 
-		// TODO: send the "packet" variable out the interface.
-		msg("TODO: Send packet: " + packet);
+//		if (DEBUG) msg("Sending packet: " + packet);
 
 		byte[] buffer = packet.getBytes();
 
