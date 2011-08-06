@@ -158,7 +158,7 @@ public class SVIPTCPClient {
 	 * Handles a single message from the server. 
 	 * Basically we just pass it over to a processor method - Event processor, or command-response processor.
 	 * @param theMessage
-	 * @return
+	 * @return - true if a message was processed. False if none was available or we didn't recognize the last. 
 	 */
 	private boolean processOneMessage (String theMessage) {
 
@@ -244,6 +244,73 @@ public class SVIPTCPClient {
 		mResponseMessageQueue.add(theMessage);
 	}
 
+	/**
+	 * sends the given message to the server
+	 * @param theMessage - the message to send
+	 * @return - returns true on success, false otherwise. 
+	 */
+	private boolean sendMessage (String theMessage) {
+		byte [] buffer = theMessage.getBytes();
+		try {
+			mOutput.write(buffer, 0, buffer.length);
+		} catch (Exception e) {
+			msg ("Error sending " + theMessage + " E=" + e.getMessage());
+			return false;
+		}
+		
+		return true;
+	}
+	
+//	/**
+//	 * Queries the server by sending a message and getting the response. 
+//	 * @param theMessageToSend
+//	 * @return
+//	 */
+//	private String queryServer (String theMessageToSend) {
+//		// TODO: Send SVIP request using sendMessage
+//		// TODO: Get SVIP Response. 
+//		// TODO: Return that response. 
+//	}
+	
+	/**
+	 * Pings the server and returns the latency, in ms, accurate to about 200ms. 
+	 * @return - returns number of milliseconds between request and response. 
+			TODO: use queryserver() to do the ping.
+	 */
+	public int pingServer () {
+		final int sleepSliceTime = 200;
+		int loopCount = 0;
+		// five second timeout? 
+		final int maxLoopCount = 25;
+		int latency = 0;
+
+		sendMessage("PING");
+		
+		// wait for a response. Wait no longer than the max loop count lets us (about 5 seconds). 
+		while (mResponseMessageQueue.isEmpty() && loopCount <= maxLoopCount) {
+			loopCount++;
+			// sleep for a bit, break out of the loop if we are interrupted. 
+			if (!EasyTime.safeSleep(200)) break;
+		}
+		
+		latency = loopCount * sleepSliceTime;
+		
+		// get a peek at the response. Is it ours? 
+		String response = mResponseMessageQueue.peek().toUpperCase(); 
+		if (response.contains("PONG") && response.contains("ACK")) {
+			response = mResponseMessageQueue.remove();
+			if (DEBUG) msg ("Ping response: " + response + " in " + latency + "ms.");
+		}
+		
+		
+
+		// return "milliseconds spent waiting for a response". 
+		return (latency);
+		
+	}
+	
+
+	
 	/**
 	 * basic diagnostic messages thing. 
 	 * @param m
@@ -355,7 +422,5 @@ public class SVIPTCPClient {
 		mECBOOBArrivedHandler = e;
 	}
 
-
-	
 	
 }// end of class. 

@@ -19,7 +19,7 @@ import com.gtosoft.libvoyager.util.OOBMessageTypes;
  *
  * This class will manage a HybridSession in a way that requires no user intervention. 
  * For example, right off the bat we'll automatically detect the hardware type, and then 
- * try to detect the CAN network if one is present.  We'll also support muultiple interfaces
+ * try to detect the CAN network if one is present.  We'll also support multiple interfaces
  * to the outside world such as TCP sockets (Command or Events). 
  *  
  *  Also, autoSessionAdapter may instantiate one or more autosession{moni,obd,command} classes based on device capabilities. 
@@ -68,6 +68,10 @@ public class AutoSessionAdapter {
 
 		// Kicks off a BT Discovery or other way to "choose" a peer.
 		choosePeerDevice();
+
+		// bind to our port. Later, we'll pass events to it so it can send them to its clients. 
+		mSVIPServer = new SVIPTCPServer();
+
 	}
 
 	private void registerDPArrivedHandler( EventCallback newParentDPArrivedHandler) {
@@ -120,7 +124,6 @@ public class AutoSessionAdapter {
 			msg ("WARNING: hs already set up. setting up again. ");
 			hs.shutdown();
 			msg ("WARNING: SVIP already set up. setting up again. ");
-			mSVIPServer.shutdown();
 		} 
 		
 		// Instantiate the hybridsession. It will start by trying to connect ot the bluetooth peer. 
@@ -131,9 +134,6 @@ public class AutoSessionAdapter {
 		hs.registerDPArrivedCallback(mLocalDPArrivedHandler);
 		// Info/debug message handler.
 		hs.registerMsgCallback(mLocalMsgArrivedHandler);
-		
-		// bind to our port. Later, we'll pass events to it so it can send them to its clients. 
-		mSVIPServer = new SVIPTCPServer();
 		
 		if (DEBUG) hs.setRoutineScanDelay(1000);
 		
@@ -220,12 +220,12 @@ public class AutoSessionAdapter {
 					// Set up a home session here. the home session will handle main processing of whichever type connection we have.
 					if (hs.getHardwareDetectData().isMoniSupported().equals("true") || hs.getHardwareDetectData().isHardwareSWCAN().equals("true")) { 
 						// Stars are aligned. Go moni.
-						// TODO: Don't necessary switch to moni right now unless the attached CAN network is SUPPORTED/RECOGNIZED.
 						sendOOBMessage(OOBMessageTypes.SERVICE_STATE_CHANGE, "Moni supported. Entering moni.");
-						mAutoMoni = new AutoSessionMoni (hs);
+						hs.setActiveSession(HybridSession.SESSION_TYPE_MONITOR);
 					} else {
 						// Fall back on OBD. 
 						sendOOBMessage(OOBMessageTypes.SERVICE_STATE_CHANGE, "Moni not supported. Fallback on ODB");
+						// use an auto adapter to manage the OBD stuff automagically? 
 						mAutoOBD = new AutoSessionOBD(hs,mLocalOOBMessageHandler);
 					}
 				} 
@@ -318,7 +318,6 @@ public class AutoSessionAdapter {
 	 * @param sDecodedData - decoded data in string format. 
 	 */
 	private void sendDPArrivedMessage (String DPN, String sDecodedData) {
-
 		// pass the message to our parent class
 		if (mParentDPArrivedHandler != null) {
 			// TODO: is it ok that we're passing a "0" here? 
