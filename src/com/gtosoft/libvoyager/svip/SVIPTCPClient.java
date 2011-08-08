@@ -21,7 +21,7 @@ import com.gtosoft.libvoyager.util.GeneralStats;
  */
 
 public class SVIPTCPClient {
-	boolean 		DEBUG = true;
+	boolean 		DEBUG = false;
 	Thread			mtMessagesAndState;
 	BufferedInputStream 	mInput;
 	OutputStream   	mOutput;
@@ -284,13 +284,19 @@ public class SVIPTCPClient {
 		final int maxLoopCount = 25;
 		int latency = 0;
 
-		sendMessage("PING");
+		sendMessage("PING|>");
 		
 		// wait for a response. Wait no longer than the max loop count lets us (about 5 seconds). 
 		while (mResponseMessageQueue.isEmpty() && loopCount <= maxLoopCount) {
 			loopCount++;
 			// sleep for a bit, break out of the loop if we are interrupted. 
 			if (!EasyTime.safeSleep(200)) break;
+		}
+		
+		// Timeout waiting for ping response from server. 
+		if (loopCount > maxLoopCount) {
+			if (DEBUG) msg ("Timeout while waiting for ping response from server");
+			return 9999;
 		}
 		
 		latency = loopCount * sleepSliceTime;

@@ -27,7 +27,7 @@ import com.gtosoft.libvoyager.util.OOBMessageTypes;
 
 
 public class AutoSessionAdapter {
-	final boolean DEBUG = false;
+	final boolean DEBUG = true;
 	HybridSession	 hs; 					// hybrid session is the top of the libVoyager pyramid. it manages everything else. 
 	Context			 mctxParentService;		// a reference to the parent context so that we can do things like work with Bluetooth. 
 	BluetoothAdapter mbtAdapter;
@@ -253,10 +253,9 @@ public class AutoSessionAdapter {
 		@Override
 		public void onDPArrived(String DPN, String sDecodedData, int iDecodedData) {
 			
-			// Pass the DP Arrived event to the SVIP Server, in case any clients are connected. 
-			if (mSVIPServer != null) mSVIPServer.sendDPArrived(DPN, sDecodedData);
-			
-			// Route it upwards! The parent has most likely registered to receive DPNs as they are decoded. So pass them along. 
+			// Route it upwards! 
+			// - to our parent class, in case they want it
+			// - also probably to SVIP or whatever. 
 			sendDPArrivedMessage(DPN, sDecodedData);
 		}
 	};

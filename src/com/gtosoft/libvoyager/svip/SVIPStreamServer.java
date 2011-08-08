@@ -6,7 +6,6 @@ import java.io.OutputStream;
 
 import android.util.Log;
 
-import com.gtosoft.libvoyager.session.HybridSession;
 import com.gtosoft.libvoyager.util.EasyTime;
 import com.gtosoft.libvoyager.util.GeneralStats;
 
