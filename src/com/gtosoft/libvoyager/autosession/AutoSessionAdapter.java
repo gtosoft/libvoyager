@@ -1,5 +1,8 @@
 package com.gtosoft.libvoyager.autosession;
 
+import java.util.Set;
+import java.util.TreeSet;
+
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.util.Log;
@@ -35,6 +38,11 @@ public class AutoSessionAdapter {
 	GeneralStats	 mgStats = new GeneralStats();
 	ServiceHelper 	 msHelper;
 
+	// This will hold zero or more DPNs. If a DPN is in this set then we route/forward DPArrived events up the chain as we see them. 
+	// elements not in the list get dropped by this class. 
+	// Use a treeSets because it is sorted for faster access. 
+	Set<String> mDPSubscribedSet = new TreeSet<String>();
+	
 	// SVIP server component. listens for incoming connections. its lifecycle should track that of the hybridsession. 
 	SVIPTCPServer mSVIPServer;
 
@@ -253,10 +261,15 @@ public class AutoSessionAdapter {
 		@Override
 		public void onDPArrived(String DPN, String sDecodedData, int iDecodedData) {
 			
-			// Route it upwards! 
-			// - to our parent class, in case they want it
-			// - also probably to SVIP or whatever. 
-			sendDPArrivedMessage(DPN, sDecodedData);
+			if (mDPSubscribedSet.contains(DPN)) {
+				// Route it upwards! 
+				// - to our parent class, in case they want it
+				// - also probably to SVIP or whatever. 
+				sendDPArrivedMessage(DPN, sDecodedData);
+			} else {
+				msg ("AugoSessionAdapter: Not routing DPN " + DPN + " because no subscription exists for it.");
+				// skip routing of this DPN - not subscribed. 
+			}
 		}
 	};
 	
@@ -328,6 +341,18 @@ public class AutoSessionAdapter {
 			mSVIPServer.sendDPArrived(DPN, sDecodedData);
 		}
 
+	}
+
+	public void addDPSubscription (String DPN) {
+		mDPSubscribedSet.add(DPN);
+	}
+	
+	public void removeDPSubscription (String DPN) {
+		mDPSubscribedSet.remove(DPN);
+	}
+	
+	public Set<String> getDPSubscriptionSet () {
+		return new TreeSet<String>(mDPSubscribedSet);
 	}
 	
 	

@@ -47,9 +47,7 @@ public class SVIPTCPServer {
 	 */
 	public SVIPTCPServer() {
 		if (DEBUG) msg ("----------------------------------------------------------------------SVIP TCP SERVER STARTUP.");
-//		if (DEBUG) EasyTime.safeSleep(1000);
-		
-//		hs = h;
+
 		// Start a thread that waits for new connections. 
 		startAcceptThread();
 	}

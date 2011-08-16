@@ -17,17 +17,33 @@ Sample Transation.
 
 CLIENT					SERVER
 ==================================================================
+
+* Sends a ping, expects a pong response.
 PING|>		<_		
 		  >			ACK|PING|PONG|>
 
+* rejected secret. possibly close connection upon bad secret. 
 AUTH|BADSECRET|> <_
 		  >			NACK|AUTH|>
+
+* specify authentication secret. 
 AUTH|SECRET|>	<_
 		  >			ACK|AUTH|>
 
+* future use: activate or deactivate unsolicited OOB messages. When activated, out of band messages will be broadcast to all connected clients. 
 OOB|on|>	<_
 		  >			ACK|OOB|>
 
+* Get a list of all DPNs that we can subscribe to. 
+GETACTIVEDPNS|>	<_
+		  >			ACK|GETACTIVEDPNS|SPEED,RPM,GPS|>
+
+* Subscribe to zero or more DPNs. Once subscribed, expect to receive upates for each DPN. 
+SETDPNFILTER|SPEED|>	<_
+		  	>			ACK|SETDPNFILTER|>
+
+
+* Sample messages (unsolicited types): 
 					OOB|IOCONNECT|1|>
 					OOB|SESSIONDETECT|detected network as CAN 500 moni=yes|>
 					OOB|MSG|Diagnostic message: asdfad asdfa sd fsdf|>
@@ -36,8 +52,6 @@ OOB|on|>	<_
 					DPDATA|RPM|1510|>
 					DPDATA|RPM|1505|>
 					DPDATA|SPEED|27|>
-
-
 
 * libVoyager will support more than one simultaneous connections. 
 * Any connection can elect to receive OOB events and/or decoded-data (DPDATA) events. 
