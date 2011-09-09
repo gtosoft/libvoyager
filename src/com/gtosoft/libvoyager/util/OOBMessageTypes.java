@@ -20,5 +20,13 @@ public final class OOBMessageTypes {
 	
 	// in case the service wants to tell of its state. state will be a string for now. 
 	public static final String SERVICE_STATE_CHANGE = "ServiceStateChange";
+
+	// SVIP client just connected.
+	public static final String SVIP_CLIENT_JUST_CONNECTED = "svip.client.connected";
+
+	// new subscribe request. 
+	public static final String SVIP_CLIENT_SUBSCRIBE_REQUEST = "svip.subscribe";
+	public static final String SVIP_CLIENT_UNSUBSCRIBE_REQUEST = "svip.UNsubscribe";
 	
 }
+

@@ -13,6 +13,7 @@ import android.util.Log;
 import com.gtosoft.libvoyager.util.EasyTime;
 import com.gtosoft.libvoyager.util.EventCallback;
 import com.gtosoft.libvoyager.util.GeneralStats;
+import com.gtosoft.libvoyager.util.OOBMessageTypes;
 
 /**
  * This class will connect to the specified peer IP and open a connection for commands/events using
@@ -344,7 +345,7 @@ public class SVIPTCPClient {
 				msg ("Successful connect! attaching streams.");
 				ret = attachStreams();
 				if (ret) {
-					sendOOBEvent ("client.connected","");
+					sendOOBEvent (OOBMessageTypes.SVIP_CLIENT_JUST_CONNECTED,"");
 				} else {
 					// failed attempt to connect.
 					mgStats.incrementStat("svip.connectToServer.fails");
@@ -426,6 +427,15 @@ public class SVIPTCPClient {
 	
 	public void registerOOBArrivedHandler (EventCallback e) {
 		mECBOOBArrivedHandler = e;
+	}
+
+	/**
+	 * @param DPN - the datapoint to which we are to subscribe. 
+	 * @return - true on success, false otherwise. 
+	 */
+	public boolean subscribe(String DPN) {
+		// just build it ourself for now. 
+		return sendMessage("SUBSCRIBE|" + DPN + "|>");
 	}
 
 	

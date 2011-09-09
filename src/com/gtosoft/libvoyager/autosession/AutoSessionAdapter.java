@@ -186,6 +186,10 @@ public class AutoSessionAdapter {
 		public void onOOBDataArrived(String dataName, String dataValue) {
 //			msg ("(event) OOB Message: " + dataName + "=" + dataValue);
 			
+			if (dataName.equals(OOBMessageTypes.SVIP_CLIENT_SUBSCRIBE_REQUEST)) {
+				// TODO: hs.subscribe (dataValue);
+			}
+			
 			//  If the OOB message is that of the I/O layer just having connected, then kick off a Hybrid Session detection routine. 
 			//	If that is successful then move forward with setup
 			//	If unsuccessful, then continuously re-try as long as bt remains connected.

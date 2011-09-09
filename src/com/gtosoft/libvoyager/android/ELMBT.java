@@ -54,10 +54,10 @@ public class ELMBT {
 	// keeps track of number of sequential connect() failures. reset to 0 upon successful connect.
 	int mSuccessiveFailedConnects = 0;
 	// defines the maximum number of failures we allow ourself before giving up completely and shutting ourself down. 
-	int mMaxSuccessiveConnectFails = 20;
+	int mMaxSuccessiveConnectFails = 5;
 
 	// minimum number of seconds that must elapse between two connect()'s. 
-	int MINIMUM_RECONNECT_PERIOD = 1;
+	int MINIMUM_RECONNECT_PERIOD = 2;
 
 	// maximum number of bytes to accept in the input buffer before we start blocking/dropping. 
 	final int INPUT_BUFFER_SIZE = 32767;

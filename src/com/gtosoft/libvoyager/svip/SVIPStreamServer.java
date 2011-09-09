@@ -6,8 +6,10 @@ import java.io.OutputStream;
 
 import android.util.Log;
 
+import com.gtosoft.libvoyager.session.HybridSession;
 import com.gtosoft.libvoyager.util.EasyTime;
 import com.gtosoft.libvoyager.util.GeneralStats;
+import com.gtosoft.libvoyager.util.OOBMessageTypes;
 
 /**
  * The life of this class corresponds to a single open SVIP connection. When the
@@ -29,7 +31,6 @@ public class SVIPStreamServer {
 
 	BufferedInputStream mInStream;
 	OutputStream mOutStream;
-//	HybridSession hs;
 
 	/**
 	 * Default Constructor. To instantiate this class you must have an open
@@ -40,7 +41,6 @@ public class SVIPStreamServer {
 	 * @param outStream - an output stream, which we will send responses to.
 	 */
 	public SVIPStreamServer(BufferedInputStream bufferedInputStream, OutputStream outStream) {
-//		hs = hsession;
 		mInStream = bufferedInputStream;
 		mOutStream = outStream;
 
@@ -189,21 +189,29 @@ public class SVIPStreamServer {
 		// split the message into its components. 
 		messageParts = rawCommand.split("\\|");
 		
-		msg ("Raw Command " + rawCommand + " has " + messageParts.length + " parts");
+		if (DEBUG) msg ("Raw Command " + rawCommand + " has " + messageParts.length + " parts");
 		
 		// zero items in the list? 
 		if (messageParts != null && messageParts.length < 1) {
 			return responses;
 		}
 
-		// now that we at least have the command, built the default response for that. 
-		responses = new String [] {messageParts[MESSAGE_PART_COMMAND],SVIPConstants.RESPONSE_NACK};
+		// now that we at least have the command, build the default response for that. 
+		responses = new String [] {SVIPConstants.RESPONSE_NACK,messageParts[MESSAGE_PART_COMMAND]};
 
 		
 		// Acknowledge that we recieved their "PING" and add a "PONG".  
 		if (messageParts[MESSAGE_PART_COMMAND].equals(SVIPConstants.REQUEST_PING)) {
 			responses = new String [] {SVIPConstants.REQUEST_PING, SVIPConstants.RESPONSE_PONG, "libVoyager"};
 		}
+
+		// Subscribe request?
+		if (messageParts[MESSAGE_PART_COMMAND].equals(SVIPConstants.REQUEST_PING)) {
+			// perform the subscribe by passing the message through the OOB network. 
+			sendOOB(OOBMessageTypes.SVIP_CLIENT_SUBSCRIBE_REQUEST, messageParts[MESSAGE_PART_COMMAND]);
+			responses = new String [] {SVIPConstants.RESPONSE_ACK,messageParts[MESSAGE_PART_COMMAND]};
+		}
+			
 		
 		
 		return responses;
