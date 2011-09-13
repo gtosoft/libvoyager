@@ -278,8 +278,10 @@ public class ELMBT {
 	 */
 	private boolean ableToConnect () {
 		// sanity checks
-		if (mReconnectIfDisconnected != true)
+		if (mReconnectIfDisconnected != true) {
+			msg ("Not trying to connect - we have been instructed to NOT reconnect if disconnected, and we are disconnected.");
 			return false;
+		}
 		
 		if (numRetriesRemaining() < 1)
 			return false;
@@ -310,8 +312,9 @@ public class ELMBT {
 		// Perform the actual connection attempt
 		ret = connect();
 		// If the connection failed, then run a function that keeps track of that sort of thing. 
-		if (!ret) 
+		if (!ret) {
 			connectFailed();
+		}
 		
 		// whether we connected or not, set the connection status. 
 		setConnected(ret);
@@ -420,7 +423,6 @@ public class ELMBT {
 			mBTSocket.connect();
 		} catch (Exception e) {
 			msg ("connect(): Failed attempt number " + (mSuccessiveFailedConnects+1) + " of " + mMaxSuccessiveConnectFails + " while connecting to " + mPeerMAC + "(" + mBTDevice.getName() + "). Error was: " + e.getMessage());
-			sendOOBMessage(OOBMessageTypes.BLUETOOTH_FAILED_CONNECT, "" + numRetriesRemaining());
 			return false;
 			// there was a problem connecting... make a note of the particulars and move on. 
 		}
@@ -513,14 +515,18 @@ public class ELMBT {
 		return mConnected;
 	}
 
+	/**
+	 * Execute this method if an attempt to connect resulted in failure. 
+	 */
 	private void connectFailed() {
-		msg ("Connect Failed.");
-		
 		mTotalFailedConnects++;
-		mGenStats.setStat("totalFailedConnects", "" + mTotalFailedConnects);
 		mSuccessiveFailedConnects++;
-		if (mSuccessiveFailedConnects > mMaxSuccessiveConnectFails)
+		
+		mGenStats.setStat("totalFailedConnects", "" + mTotalFailedConnects);
+		if (numRetriesRemaining() < 1)
 			if (DEBUG==true) msg ("WARNING: REACHED MAXIMUM CONNECT RETRIES (" + mSuccessiveFailedConnects + ")" + ". NOT TRYING ANY MORE. ");
+
+		sendOOBMessage(OOBMessageTypes.BLUETOOTH_FAILED_CONNECT, "" + numRetriesRemaining());
 	}
 
 	
