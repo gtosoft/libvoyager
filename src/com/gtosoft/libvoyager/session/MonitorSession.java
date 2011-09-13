@@ -870,4 +870,20 @@ public class MonitorSession {
 		return true;
 	}
 
+	/**
+	 * returns the number of packets we've handled. 
+	 * @return
+	 */
+	public long getNumPackets() {
+		long ret = 0;
+		
+		try {
+			ret = pd.getNetworkStats().getNumMessagesProcessed();
+		} catch (Exception e) {
+			msg ("ERROR: Unable to determine number of moni packets processed. E=" + e.getMessage());
+		}
+		
+		return ret;
+	}
+
 }

@@ -6,7 +6,6 @@ import java.io.OutputStream;
 
 import android.util.Log;
 
-import com.gtosoft.libvoyager.session.HybridSession;
 import com.gtosoft.libvoyager.util.EasyTime;
 import com.gtosoft.libvoyager.util.GeneralStats;
 import com.gtosoft.libvoyager.util.OOBMessageTypes;
@@ -206,9 +205,9 @@ public class SVIPStreamServer {
 		}
 
 		// Subscribe request?
-		if (messageParts[MESSAGE_PART_COMMAND].equals(SVIPConstants.REQUEST_PING)) {
-			// perform the subscribe by passing the message through the OOB network. 
-			sendOOB(OOBMessageTypes.SVIP_CLIENT_SUBSCRIBE_REQUEST, messageParts[MESSAGE_PART_COMMAND]);
+		if (messageParts[MESSAGE_PART_COMMAND].equals(SVIPConstants.DPN_SUBSCRIBE)) {
+			// perform the subscribe by passing the message through the OOB network. Who is listening? The Autosessionadapter. 
+			sendOOB(OOBMessageTypes.SVIP_CLIENT_SUBSCRIBE_REQUEST, messageParts[MESSAGE_PART_REQUEST]);
 			responses = new String [] {SVIPConstants.RESPONSE_ACK,messageParts[MESSAGE_PART_COMMAND]};
 		}
 			

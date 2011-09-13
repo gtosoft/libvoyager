@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 import android.text.InputFilter.LengthFilter;
@@ -22,7 +23,7 @@ import com.gtosoft.libvoyager.util.OOBMessageTypes;
  */
 
 public class SVIPTCPClient {
-	boolean 		DEBUG = false;
+	boolean 		DEBUG = true;
 	Thread			mtMessagesAndState;
 	BufferedInputStream 	mInput;
 	OutputStream   	mOutput;
@@ -198,8 +199,13 @@ public class SVIPTCPClient {
 	private void processDPDataMessage(String theMessage) {
 		String[] msgparts = theMessage.split("\\|");
 		
-		if (msgparts == null || msgparts.length < 4) {
-			msg ("Runt DP message: " + theMessage);
+		if (msgparts == null ) {
+			msg ("Runt DP message: " + theMessage );
+			return;
+		}
+		
+		if (msgparts.length < 4) {
+			msg ("Runt DP message: " + theMessage +  " numParts=" + msgparts.length);
 			return;
 		}
 		
@@ -217,8 +223,13 @@ public class SVIPTCPClient {
 	private void processOOBMessage(String theMessage) {
 		String[] msgparts = theMessage.split("\\|");
 
-		if (msgparts == null || msgparts.length < 4) {
+		if (msgparts == null) {
 			msg ("Runt OOB message: " + theMessage);
+			return;
+		}
+
+		if (msgparts.length < 4) {
+			msg ("Runt OOB message: " + theMessage + " numParts=" + msgparts.length);
 			return;
 		}
 
@@ -431,11 +442,25 @@ public class SVIPTCPClient {
 
 	/**
 	 * @param DPN - the datapoint to which we are to subscribe. 
+	 * ONLY CALL THIS METHOD IF SVIP IS CONNECTED! DUH!
 	 * @return - true on success, false otherwise. 
 	 */
 	public boolean subscribe(String DPN) {
 		// just build it ourself for now. 
 		return sendMessage("SUBSCRIBE|" + DPN + "|>");
+	}
+
+	/**
+	 * Convenience method to subscribe to a list of datapoints. 
+	 * ONLY CALL THIS METHOD IF SVIP IS CONNECTED! DUH!
+	 * @param DPSubscriptions
+	 */
+	public void subscribe(List<String> DPSubscriptions) {
+		for (String dp : DPSubscriptions) {
+			if (DEBUG) msg ("Adding subscription for DPN " + dp);
+			subscribe(dp);
+		}
+		
 	}
 
 	

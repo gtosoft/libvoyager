@@ -184,10 +184,10 @@ public class AutoSessionAdapter {
 	EventCallback mLocalOOBMessageHandler = new EventCallback () {
 		@Override
 		public void onOOBDataArrived(String dataName, String dataValue) {
-//			msg ("(event) OOB Message: " + dataName + "=" + dataValue);
+			msg ("(event) OOB Message: " + dataName + "=" + dataValue);
 			
 			if (dataName.equals(OOBMessageTypes.SVIP_CLIENT_SUBSCRIBE_REQUEST)) {
-				// TODO: hs.subscribe (dataValue);
+				addDPSubscription(dataValue);
 			}
 			
 			//  If the OOB message is that of the I/O layer just having connected, then kick off a Hybrid Session detection routine. 
@@ -230,7 +230,10 @@ public class AutoSessionAdapter {
 				if (success == true) {
 					setCurrentStateMessage("Network configured.");
 					// Set up a home session here. the home session will handle main processing of whichever type connection we have.
-					if (hs.getHardwareDetectData().isMoniSupported().equals("true") || hs.getHardwareDetectData().isHardwareSWCAN().equals("true")) { 
+					if ((hs.getMonitorSession().getNumPackets() > 0) && 
+							(hs.getHardwareDetectData().isMoniSupported().equals("true") || 
+							 hs.getHardwareDetectData().isHardwareSWCAN().equals("true"))
+						) { 
 						// Stars are aligned. Go moni.
 						sendOOBMessage(OOBMessageTypes.SERVICE_STATE_CHANGE, "Moni supported. Entering moni.");
 						hs.setActiveSession(HybridSession.SESSION_TYPE_MONITOR);
@@ -265,17 +268,22 @@ public class AutoSessionAdapter {
 		@Override
 		public void onDPArrived(String DPN, String sDecodedData, int iDecodedData) {
 			
-			if (mDPSubscribedSet.contains(DPN)) {
+			if (isDPSubscribed(DPN)) {
 				// Route it upwards! 
 				// - to our parent class, in case they want it
 				// - also probably to SVIP or whatever. 
 				sendDPArrivedMessage(DPN, sDecodedData);
 			} else {
-				msg ("AugoSessionAdapter: Not routing DPN " + DPN + " because no subscription exists for it.");
+				msg ("AutoSessionAdapter: Not routing DPN " + DPN + " because no subscription exists for it.");
 				// skip routing of this DPN - not subscribed. 
 			}
 		}
 	};
+	
+	private boolean isDPSubscribed (String DPN) {
+		if (DEBUG) msg ("Subscribed Treeset contains " + mDPSubscribedSet.size() + " elements.");
+		return mDPSubscribedSet.contains(DPN);
+	}
 	
 	/**
 	 * - getStats returns the current generalStats object. AutoSessionAdapter is at the top of the pyramid, just above HybridSession.
@@ -348,7 +356,24 @@ public class AutoSessionAdapter {
 	}
 
 	public void addDPSubscription (String DPN) {
+		msg ("Got request to subscribe to DPN " + DPN);
 		mDPSubscribedSet.add(DPN);
+
+		if (hs.getCurrentSessionType() == HybridSession.SESSION_TYPE_MONITOR) {
+			if (hs.getMonitorSession().getCurrentState() != 40) {
+				msg ("Moni session state not 40. Switching to OBD");
+				hs.setActiveSession(HybridSession.SESSION_TYPE_OBD2);
+			}
+		}
+		
+		if (hs.getCurrentSessionType() == HybridSession.SESSION_TYPE_OBD2) {
+			try {
+				if (DEBUG) msg ("Adding DPN " + DPN + " to routine scan!");
+				hs.getRoutineScan().addDPN(DPN);
+			} catch (Exception e) {
+				msg ("ASA: Error adding subscription to routinescan: " + e.getMessage());
+			}
+		}
 	}
 	
 	public void removeDPSubscription (String DPN) {
