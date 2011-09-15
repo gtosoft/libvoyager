@@ -13,6 +13,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
 import com.gtosoft.libvoyager.util.EasyTime;
@@ -30,6 +32,7 @@ import com.gtosoft.libvoyager.util.OOBMessageTypes;
  * 
  */  
 public class ActivityHelper {
+	final String PREF_LAST_MAC = "LAST_MAC";
 	Context mctxParent = null;
 	EventCallback mOnELMDeviceChosenCallback = null;
 	EventCallback mParentOOBHandler = null;
@@ -236,4 +239,28 @@ public class ActivityHelper {
 	public void registerChosenDeviceCallback (EventCallback chosenCallback) {
 		mOnELMDeviceChosenCallback = chosenCallback;
 	}
-}
+
+	
+	/**
+	 * Returns last used MAC if available. Otherwise a blank string.
+	 * @return
+	 */
+	public String getLastUsedMAC () {
+		SharedPreferences sp = ((Activity)mctxParent).getPreferences(Context.MODE_PRIVATE);
+		
+		return sp.getString(PREF_LAST_MAC, "");
+	}
+
+	/**
+	 * cheap and dirty way to save last used MAC.  
+	 * @param lastUsedMAC
+	 */
+	public void setLastUsedMAC (String lastUsedMAC) {
+		Editor e = ((Activity)mctxParent).getPreferences(Context.MODE_PRIVATE).edit();
+		e.putString(PREF_LAST_MAC, lastUsedMAC);
+		e.commit();
+	}
+
+	
+	
+}// end of class.
