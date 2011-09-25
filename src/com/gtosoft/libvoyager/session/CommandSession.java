@@ -525,6 +525,8 @@ public class CommandSession {
 
 	public GeneralStats getStats() {
 		
+		isSuspended(); // updates stat. 
+		
 		// for now, collect stats on demand, right here. 
 		mgStats.setStat("state", "" + getCurrentState());
 		mgStats.setStat("currentPriority", "" + mCurrentPriority);

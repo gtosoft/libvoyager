@@ -898,6 +898,7 @@ public class OBD2Session {
 
 	public GeneralStats getStats() {
 
+		isSuspended(); // updates stat. 
 		mgStats.setStat("state", "" + getCurrentState());
 		mgStats.setStat("stateName", getCurrentStateByName());
 

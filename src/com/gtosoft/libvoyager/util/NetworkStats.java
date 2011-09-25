@@ -8,7 +8,6 @@ package com.gtosoft.libvoyager.util;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,10 +19,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.gtosoft.libvoyager.db.DashDB;
-
 import android.os.Environment;
 import android.util.Log;
+
+import com.gtosoft.libvoyager.db.DashDB;
 
 
 
@@ -63,7 +62,7 @@ public class NetworkStats {
 
 	// If not null, then logging is enabled and we should write every packet to file!
 	FileWriter mLogFile = null;
-	final String mLogFileNameX = "replaylog";
+	final String mLogFileName = "replaylog";
 	
 	
 	public NetworkStats(DashDB ddb) {
@@ -97,35 +96,29 @@ public class NetworkStats {
 	 * @return
 	 */
 	public boolean setLogging (boolean trueOrFalse) {
-
-
-		
 		// true, so activate logging. 
 		if (trueOrFalse == true) {
 			try {
 				setLogging(false);// close logfile in case already open.
 				// Make sure the directory exists. 
-				String backupDirectory = Environment.getExternalStorageDirectory()+ "/Dash";
+				String backupDirectory = Environment.getExternalStorageDirectory()+ "/voyager";
 				mkdir (backupDirectory);
-				mLogFile = new FileWriter(backupDirectory + "/" + mLogFileNameX,true);
+				String fullPath = backupDirectory + "/" + mLogFileName;
+				mLogFile = new FileWriter(fullPath,true);
+				mgStats.setStat("replaylog.path", fullPath);
 			} catch (Exception e1) {
 				msg ("Error setting up logger: " + e1.getMessage());
 				return false;
 			}
 
-			
-			// Append a timestamp to the file so we know where we're starting. 
-			try {
-				mLogFile.append("\n# LOG STARTED " + EasyTime.currentDateAndTimeStamp() + "\n");
-			} catch (IOException e) {
-				msg ("Error: unable to write timestamp to logfile. deactivating logging.");
-				mLogFile = null;
-			}
+			appendLog("\n# LOG STARTED " + EasyTime.currentDateAndTimeStamp() + "\n");
+			msg ("Log file started.");
 			
 		}// end of "if true, do all this"
 		else {
 			// request for logging to be shut off. Try and close the file gracefully and set log handle to null.
 			try {
+				mLogFile.flush();
 				mLogFile.close();
 				mLogFile = null;
 			} catch (Exception e) {
@@ -136,19 +129,30 @@ public class NetworkStats {
 		return true;
 	}
 
+	public boolean appendLog (String dataLine) {
+		if (mLogFile == null) {
+			msg ("Error appending to logfile: file handle is null");
+			return false;
+		}
+		
+		try {
+			mLogFile.append(dataLine);
+		} catch (Exception e) {
+			// kill it. 
+			msg ("Error writing to log so we will now terminate logging. Error was: " + e.getMessage());
+			setLogging(false);
+			return false;
+		}
+		
+		return true;
+	}
+	
 	/**
 	 * Writes (appends) the given packet to the log file, if logging is enabled. 
 	 * @param packet - the exact packaet you want appended. We'll add CRLF. 
 	 */
 	private void logOnePacket (String HDR, String data) {
-		if (mLogFile != null) {
-			try {
-				mLogFile.append(HDR + " " + data + "\n");
-			} catch (IOException e) {
-				msg ("Error appending data to logfile. E=" + e.getMessage() + "Dash: Closing logfile.");
-				setLogging(false);
-			}
-		}
+		appendLog(HDR + " " + data + "\n");
 	}
 
 	
@@ -921,6 +925,23 @@ public class NetworkStats {
 //	    }
 //	    return sortedMap;
 //	}
+
+	/**
+	 * Returns the full path to the currently active replay log file. Or a blank string if none is active. 
+	 */
+	public String getLogFilePath() {
+
+		String path = mgStats.getStat("replaylog.path");
+		
+		if (path == null) 
+			path="";
+	
+		return path;
+	}
+
+	public void shutdown() {
+		setLogging(false);
+	}
 	
 
 }

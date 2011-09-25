@@ -19,6 +19,7 @@ import com.gtosoft.libvoyager.db.DashDB;
 import com.gtosoft.libvoyager.util.EasyTime;
 import com.gtosoft.libvoyager.util.EventCallback;
 import com.gtosoft.libvoyager.util.GeneralStats;
+import com.gtosoft.libvoyager.util.NetworkStats;
 import com.gtosoft.libvoyager.util.OOBMessageTypes;
 import com.gtosoft.libvoyager.util.PIDDecoder;
 import com.gtosoft.libvoyager.util.RoutineScan;
@@ -709,6 +710,18 @@ public class HybridSession {
 		} else {
 			if (DEBUG) msg ("FAILED to set routine scan loop delay because it's not instantiated yet.");
 		}
+	}
+
+	/*
+	 * Returns a handle to the networkstats object owned by the hybridsession. 
+	 */
+	public NetworkStats getNetworkStats() {
+		
+		// just in case...
+		if (pd == null) return null;
+		
+		
+		return pd.getNetworkStats();
 	}
 	
 }

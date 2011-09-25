@@ -106,7 +106,7 @@ public class ELMBT {
 	long mUTLastConnectionAttempt = 0;
 	
 	// current time in unix seconds. Set by a timer. 
-	Thread mtTimer = null;
+//	Thread mtTimer = null;
 	
 	EasyTime eTime = new EasyTime();
 	
@@ -123,6 +123,9 @@ public class ELMBT {
 
 	// STATS
 	long mBytesIn = 0;
+	
+	// used to tell if we have just started or stopped discovering. 
+	private boolean mLastDiscoveryState = false;
 	
 	
 	/**
@@ -233,6 +236,12 @@ public class ELMBT {
 					
 					// take a nap. If we're interrupted, break out of the loop. 
 					if (EasyTime.safeSleep(STATUS_THREAD_UPDATE_INTERVAL) == false) break;
+
+					// check and see if the discovery state changed. 
+					if (isDiscovering() != mLastDiscoveryState) {
+						mLastDiscoveryState = isDiscovering();
+						sendDiscoveryEvent(isDiscovering());
+					}
 					
 				}// end of main while loop. 
 				
@@ -470,7 +479,6 @@ public class ELMBT {
 		
 		mGenStats.setStat("discovery.timeToCancel", "" + (x * 200) + "ms");
 		if (DEBUG) msg ("Cancel-Discovery operation blocked for " + (x*200) + "ms");
-		
 	}
 
 
@@ -1466,7 +1474,11 @@ public class ELMBT {
 		if (!isBTConnected())
 			return "";
 		
-		return sendATCommand2("ATDP");
+		String proto = sendATCommand2("ATDP");
+		
+		mGenStats.setStat("elmProtocol.name",proto);
+		
+		return proto;
 	}
 
 
@@ -1493,7 +1505,7 @@ public class ELMBT {
 			msg ("Error converting protocol number from hex to decimal: " + response);
 		}
 
-		mGenStats.setStat("elmProtocolNum","" + ret); 
+		mGenStats.setStat("elmProtocol.num",ret); 
 		
 		return ret;
 	}

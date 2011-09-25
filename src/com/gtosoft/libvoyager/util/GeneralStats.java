@@ -170,7 +170,7 @@ public class GeneralStats {
 			thisValue = mhmStats.get(thisKey);
 
 			// append this stat. 
-			allStats = allStats + thisKey + "=" + thisValue + "\n";
+			allStats = allStats + "# " + thisKey + "=" + thisValue + "\n";
 		}// end of while. 
 		
 		return allStats;
@@ -196,24 +196,29 @@ public class GeneralStats {
 		setStat(key, newVal);
 	}
 	
+	/**
+	 * Just a backward compability method that executes getAllStats();
+	 * @return
+	 */
 	public String getAllStatsAsString () {
-		String allStats = "";
-		
-		HashMap<String,String> hmStats = mhmStats;
-		
-		// use a treeSet for auto sorting... 
-		Set<String> s = new TreeSet<String>(hmStats.keySet());
-		Iterator<String> i = s.iterator();
-		
-		String key = "";
-		String value = "";
-		while (i.hasNext()) {
-			key = i.next();
-			value = hmStats.get(key);
-			allStats = allStats + key + "=" + value + "\n";
-		}// end of while
-
-		return allStats;
+		return getAllStats();
+//		String allStats = "";
+//		
+//		HashMap<String,String> hmStats = mhmStats;
+//		
+//		// use a treeSet for auto sorting... 
+//		Set<String> s = new TreeSet<String>(hmStats.keySet());
+//		Iterator<String> i = s.iterator();
+//		
+//		String key = "";
+//		String value = "";
+//		while (i.hasNext()) {
+//			key = i.next();
+//			value = hmStats.get(key);
+//			allStats = allStats + "# " + key + "=" + value + "\n";
+//		}// end of while
+//
+//		return allStats;
 	}// end of getAllStatsaSString
 
 	

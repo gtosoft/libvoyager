@@ -479,8 +479,30 @@ public class MonitorSession {
 	 */
 	private synchronized boolean startStateThread() {
 
-		if (mtState != null)
-			return false;
+		if (mtState != null) {
+			
+			//////////////////////////////////////////////////
+			msg ("cleaning up old moniSession thread...");
+			// interrupt the thread repeatedly until we either give up or the thread dies.  
+			int loops = 0;
+			while (loops < (5*5) && mtState.isAlive()) {
+				mtState.interrupt();
+				EasyTime.safeSleep(200);
+				loops++;
+			}
+
+			String suspendTime = "" + (loops * 200) + "ms";
+			mgStats.setStat("statethread.recycletime",suspendTime);
+
+			if (mtState.isAlive() == true) {
+				msg ("Could not kill old thread. unable to start new state thread. ");
+				return false;
+			} else {
+				msg ("Successfully killed old monisession thread in " + suspendTime);
+			}
+			////////////////////////////////////////////////
+			
+		}
 
 		// Make sure threads are on going into starting this thing!
 		mThreadsOn = true;
@@ -751,6 +773,8 @@ public class MonitorSession {
 
 	public GeneralStats getStats() {
 
+		
+		isSuspended(); // updates the "is suspended" stat. 
 		mgStats.setStat("state", "" + getCurrentState());
 		mgStats.setStat("stateTime", "" + getTimeInCurrentState() + "s");
 		mgStats.setStat("blocksPerMin", "" + getBufferFullsPerMinute());
@@ -804,7 +828,7 @@ public class MonitorSession {
 			return true;
 
 		boolean ret;
-		// BH NEW. To get rid of problems on uninit.
+		// BH NEW. To get rid of problems during un-init.
 		// ebt.sendATCommand("ATI");
 
 		ret = ebt.sendATInitialization(unInitString);
@@ -851,7 +875,6 @@ public class MonitorSession {
 	}
 
 	public boolean resume() {
-
 		
 		// Set initial state for threads to be kicked off.
 		mThreadsOn = true;
@@ -862,6 +885,7 @@ public class MonitorSession {
 		// Kick off state thread, which manages state and delegages the
 		// procesing of new data as it arrives.
 		boolean ret = startStateThread();
+		
 		if (ret == false)
 			msg("ERROR: MonitorSession resume(): attempt to start state thread failed. ");
 		else

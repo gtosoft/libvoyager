@@ -335,6 +335,10 @@ public class PIDDecoder {
 			}
 		}
 
+		if (nStats != null) {
+			nStats.shutdown();
+		}
+		
 	}
 
 
