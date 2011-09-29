@@ -142,6 +142,13 @@ public class NetDTCInfo {
 			if (DEBUG) msg("Socket open.");
 		}
 
+		if (socket == null) {
+			msg ("Error opening network socket. Suspect network unavailable.");
+			// TODO: take action here to allow the user to turn on their network? 
+			return false;
+		}
+		
+		
 		// try opening socket even if it's not null.
 		if (socket.isConnected() != true) {
 			openSocket();
