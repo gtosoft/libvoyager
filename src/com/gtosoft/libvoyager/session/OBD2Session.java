@@ -589,12 +589,13 @@ public class OBD2Session {
 	}
 
 	/**
-	 * Given an OBD response such as ... parse it into individual responses and
-	 * return it as a hashmap.
-	 * 
+	 * Given an OBD response, parse it into individual responses and return it as a hashmap (K=Header, V=hex bytes).
+	 * TODO: RE-WRITE THIS FUNCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	 * TODO: SPLIT THIS FUNCTION INTO MANY OTHER FUNCTIONS FOR READABILITY (Or make a new friggin class, or multiple classes!)
+	 *
 	 * @param obdResponse
-	 * @return - returns a hashmap containing individual responses and the data
-	 *         payload.
+	 * @return - returns a hashmap containing individual responses and the data payload.
+	 * 
 	 */
 	HashMap<String, String> parseOBDResponse(String DPN, String obdRequest,
 			String obdResponse, HashMap<String, String> hmResponses) {
@@ -615,11 +616,9 @@ public class OBD2Session {
 
 		// in case the request didn't include a space between bytes, we need it
 		// there to search for it in the response.
-		if (responseAckBytes.length() > 3
-				&& !responseAckBytes.substring(2, 3).equals(" ")) {
+		if (responseAckBytes.length() > 3 && !responseAckBytes.substring(2, 3).equals(" ")) {
 			// insert a space between the first and second byte.
-			responseAckBytes = responseAckBytes.substring(0, 2) + " "
-					+ responseAckBytes.substring(2, 4);
+			responseAckBytes = responseAckBytes.substring(0, 2) + " " + responseAckBytes.substring(2, 4);
 		}
 
 		// msg ("parseOBDResponse(): Searching for [" + responseAckBytes +
@@ -689,16 +688,14 @@ public class OBD2Session {
 				// Store the hexbytes.
 				if (hmResponses.containsKey(hedr)) {
 					// append multi-packet response.
-					hmResponses.put(hedr, hmResponses.get(hedr) + " "
-							+ hexBytes);
+					hmResponses.put(hedr, hmResponses.get(hedr) + " " + hexBytes);
 				} else {
 					// new.
 					hmResponses.put(hedr, hexBytes);
 				}
 
 				if (obdRequest.contains("0902")) {
-					msg("VIN: " + GTOMath.dumpHashMap(hmResponses)
-							+ " And Current response is " + responses[i]);
+					msg("VIN: " + GTOMath.dumpHashMap(hmResponses) + " And Current response is " + responses[i]);
 				}
 			} // end of if-the-response-contains-the-ack-bytes.
 			else {
@@ -783,8 +780,7 @@ public class OBD2Session {
 
 		// Check the response, if its not valid, throw it out.
 		if (obdResponse.length() < 3) {
-			msg("Threw out invalid response: " + obdResponse + " to request "
-					+ obdRequest);
+			msg("Threw out invalid response: " + obdResponse + " to request " + obdRequest);
 			return hmResponses;
 		}
 

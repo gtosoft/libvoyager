@@ -362,14 +362,13 @@ public class PIDDecoder {
 			return "";
 		}
 
-		// Send the OBD2 request by name and get the responses and parse them!
+		// Send the OBD2 request by name and get the [decoded?] responses and parse them!
 		HashMap<String, String> responses = mOBD.sendOBDRequestByName(dataPointName);
 
 		Set<String> s = responses.keySet();
 		Iterator<String> i = s.iterator();
 
-		// Iterate through responses and convert them into a
-		// comma-separated-string.
+		// Iterate through responses and convert them into a comma-separated-string of hex bytes. 
 		String thiskey = "";
 		while (i.hasNext()) {
 			thiskey = i.next();
