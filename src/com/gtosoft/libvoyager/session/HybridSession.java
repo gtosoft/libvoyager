@@ -724,4 +724,14 @@ public class HybridSession {
 		return pd.getNetworkStats();
 	}
 	
+
+	/**
+	 * 
+	 * @return - returns a handle to the dashdb instance we're using, even if it's null. 
+	 */
+	public DashDB getDashDB () {
+		return ddb;
+	}
+	
+	
 }
