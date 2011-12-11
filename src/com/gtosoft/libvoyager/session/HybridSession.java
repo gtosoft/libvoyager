@@ -503,7 +503,7 @@ public class HybridSession {
 					if (mRoutineScan != null)  {
 						if (DEBUG) msg ("Shutting down routinescan");
 						mRoutineScan.shutdown();
-						mRoutineScan = null;
+						// mRoutineScan = null;
 					}
 				
 					break;

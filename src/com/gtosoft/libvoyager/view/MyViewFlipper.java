@@ -17,9 +17,12 @@ import android.widget.ViewFlipper;
 public class MyViewFlipper extends ViewFlipper {
 	int mCurrentPage = 0;
 	int mPageFlipOrder [] = {0,1,2};
+	Context mParentContext;
 
     public MyViewFlipper(Context context, AttributeSet attrs) {
     	super(context, attrs);
+    	
+    	mParentContext = context;
     }
     
     @Override
@@ -61,34 +64,43 @@ public class MyViewFlipper extends ViewFlipper {
 public synchronized void setvFlipperPage (final int newPage) {
        final int translatedOldPage = mPageFlipOrder[mCurrentPage];
        final int translatedNewPage = mPageFlipOrder[newPage];
-       
+
        // newPage < vFlipper.getChildCount() && 
        if (newPage >= 0 && newPage < mPageFlipOrder.length ) {
-               // Switch views. 
-               mCurrentPage = newPage;
-               this.setDisplayedChild(translatedNewPage);
-               
-               // fire off an event so we can take action if necessary. Do it in the background so it is smooth to the user.   
-               new Thread () {
-                       public void run () {
-                               // added the following two looper commands in order to accomodate the cursor adapter which threw this: 
-                               //      java.lang.RuntimeException: Can't create handler inside thread that has not called Looper.prepare()
-                               Looper.prepare();
-                               long tStart = EasyTime.getUnixTime();
-                               flipEvent(translatedOldPage, translatedNewPage);
-                               long tStop = EasyTime.getUnixTime();
-                               
-                               // did the flip event take too long? 
-                               if (tStop - tStart > 2) {
+    	   	
+    	   // set flipper animations
+    	   setFlipAnimation();
+    	   
+           // Switch views. 
+           mCurrentPage = newPage;
+           this.setDisplayedChild(translatedNewPage);
+           
+           // fire off an event so we can take action if necessary. Do it in the background so it is smooth to the user.   
+           new Thread () {
+                   public void run () {
+                           // added the following two looper commands in order to accomodate the cursor adapter which threw this: 
+                           //      java.lang.RuntimeException: Can't create handler inside thread that has not called Looper.prepare()
+                           Looper.prepare();
+                           long tStart = EasyTime.getUnixTime();
+                           flipEvent(translatedOldPage, translatedNewPage);
+                           long tStop = EasyTime.getUnixTime();
+                           
+                           // did the flip event take too long? 
+                           if (tStop - tStart > 2) {
 //                                       msg ("WARNING: Async Flip event (translated page " + translatedOldPage + " to translated page" + newPage + ") took " + (tStop - tStart) + " Seconds to complete.");
-                               }
-                               Looper.loop();
-                       }
-               }.start();
+                           }
+                           Looper.loop();
+                   }
+           }.start();
                
        }// end of if there was a flip event.
 	}
 
+	private void setFlipAnimation() {
+		// TODO: These two seem to be in contention - put some thought into what would be more appropriate.
+		this.setInAnimation(mParentContext, android.R.anim.slide_in_left);
+		this.setOutAnimation(mParentContext, android.R.anim.slide_out_right);	
+	}
 
    /**
     * Override this to see flip events. 

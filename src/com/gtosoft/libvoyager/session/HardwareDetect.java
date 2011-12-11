@@ -30,7 +30,7 @@ import com.gtosoft.libvoyager.util.PIDDecoder;
  *  * We will persist to storage, any conclusive results we find. 
  *  * We will retrieve from storage, any relevant detection results that might speed up the process of detecting hardware.
  *  
- *  * This code is not re-entrant
+ *  * This code is not thread safe. It gets called from within a single synchronized method in hybridsession. 
  *  
  */
 public class HardwareDetect {
@@ -89,7 +89,7 @@ public class HardwareDetect {
 		}
 		
 		// if OBD2 support is unknown then go figure it out. Otherwise we're good. 
-		if (isOBD2Supported().equals("unknown")) {
+		if (isOBD2Supported().equals("unknown") && !isHardwareSWCAN().equals("true")) {
 			msg ("OBD2 capabilities are unknown asof yet. Please wait while we find out if device + vehicle supports OBD2.");
 			findOutIfOBDIsSupported();
 			// if OBD2 is supported, this leaves the question "is moni supported too?" - we'll answer that shortly. 
@@ -119,8 +119,8 @@ public class HardwareDetect {
 		// And finally, since we just ran a detection script, it seems fitting to persist those capabilities to storage. 
 		persistCapabilities();
 
-		msg ("Backing up DB...");
-		ddb.backupDB("HardwareDetect");
+//		msg ("Backing up DB...");
+//		ddb.backupDB("HardwareDetect");
 
 		// and finally, set the flag that says detection has been executed. 
 		mdetectionHasExecuted = true;
