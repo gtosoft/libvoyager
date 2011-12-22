@@ -436,6 +436,7 @@ public class CommandSession {
 			// is it a Sleep command?
 			if (thisCommand.startsWith("S")) {
 				try {
+					if (DEBUG) msg ("Encountered sleep sub-command.");
 					String ssleepduration = thisCommand.substring(1);
 					int isleepduration = Integer.valueOf(ssleepduration);
 					Thread.sleep(isleepduration * 100);
@@ -446,6 +447,14 @@ public class CommandSession {
 				// move on to the next loop. 
 				continue;
 			}
+			
+			// is this a request to wake up all networks? TODO: Add ability to wake up specific networks?
+			if (thisCommand.contains("WAKEALL")) {
+				if (DEBUG) msg ("Encountered wake-up sub-command. performing all-node wakeup!");
+				wakeUpAllNetworks();
+				continue;
+			}
+			
 			
 			// Is a header present, if so then set headers. 
 			if (cmdParts[i].length() > 11) {
