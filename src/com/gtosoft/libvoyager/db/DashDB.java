@@ -79,7 +79,7 @@ public class DashDB extends SQLiteOpenHelper {
 
 
 	public final static String DB_NAME = "dash.db";
-	public final static int DB_VERSION = 21;
+	public final static int DB_VERSION = 23;
 	// Version Changes: 
 	// 2 -> 3 - Added a bunch of OnStar data points, TPMS, Air Temp, speed, RPM.
 	// 3 -> 4 - Added a bunch of database schema and records to support standard OBD2 requests, as well as some "convbaseline" data for baselining the OBD2 converter methods.
@@ -101,6 +101,7 @@ public class DashDB extends SQLiteOpenHelper {
 	// 19 -> 20 - Added timestamp field to the profiles table.
 	// 20 -> 21 - Added more fields to tables to store more specific PIDs and CAN IDs 6/25/2011
 	// 21 -> 22 - Added a sleep in between FOB_STARTER commands. Needed to offset improved I/O throughput. 
+	// 22 -> 23 - adjusted DB wake commands based on recent research. 
 	
 	// Used by the passive data notification logic. our method "getDPSForHDR" returns a string array where the Y indices are these fields. 
 	public static final int DPS_FIELD_SIGBYTES 	= 0; // significant bytes, if any. 

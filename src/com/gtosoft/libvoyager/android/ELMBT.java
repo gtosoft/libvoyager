@@ -41,7 +41,7 @@ public class ELMBT {
 	int mTotalFailedConnects = 0;
 	int mTotalSuccessfulConnects = 0;
 	
-	final boolean DEBUG=false;
+	final boolean DEBUG=true;
 
 	// HTC Droid, HTC Thunderbolt, And many more. All have bugs that prevent normal Bluetooth logic to fail so we are forced to work around the bugs by some simple reflection statements.
 	//   http://stackoverflow.com/questions/4444235/problems-connecting-with-bluetooth-android

@@ -75,8 +75,9 @@ public class CommandSession {
 	// All threads owned by this class should periodically look at this variable to know whether they should be alive or not. 
 	boolean mThreadsOn = true;
 
-	// Reference to the ELMBT object that we use to communicate with the I/O layer. 
+	// Reference to the ELMBT object that we use to communicate with the I/O layer.
 	ELMBT ebt;
+	/// TODO: Get rid of ebt and abstract it with "Transport Adapter" layer. 
 	
 	boolean mSendKeepalives = false;
 	
@@ -432,13 +433,17 @@ public class CommandSession {
 		
 		for (int i=0;i<cmdParts.length;i++) {
 			thisCommand = cmdParts[i].trim();
+			final String _thisCommand = thisCommand;
+			
+			if (DEBUG) msg ("CommandSession: Processing command sub-command: " + thisCommand);
 
 			// is it a Sleep command?
 			if (thisCommand.startsWith("S")) {
 				try {
 					if (DEBUG) msg ("Encountered sleep sub-command.");
-					String ssleepduration = thisCommand.substring(1);
-					int isleepduration = Integer.valueOf(ssleepduration);
+					String sleepduration = thisCommand.substring(1);
+					int isleepduration = Integer.valueOf(sleepduration);
+					if (DEBUG) msg ("Sub-command sleep. Duration: " + isleepduration);
 					Thread.sleep(isleepduration * 100);
 				} catch (Exception e) {
 					msg ("ERROR Processing sleep command: " + thisCommand + " Err=" + e.getMessage());
@@ -462,14 +467,18 @@ public class CommandSession {
 				thisCommand = cmdParts[i].substring(12);
 			}
 
-			// send it on its way. 
-			response = ebt.sendOBDCommand(thisCommand);
-			
+			// send it on its way. Must send this in the same thread as all other stuff in this function.
+			mhWorkerHandler.post(new Runnable () {
+				public void run () {
+					ebt.sendOBDCommand(_thisCommand);
+				}
+			} );
+
 		}// end of loop that loops through all the commands in the semi-colon separated list. 
 		
 		// This only checks the last command in the string but if it returns an error, return false. 
-		if (response.contains("ERROR"))
-			return false;
+//		if (response.contains("ERROR"))
+//			return false;
 		
 		return true;
 	}
@@ -649,6 +658,7 @@ public class CommandSession {
 					switchTo11BitTransmitMode();
 					sendWakeupAllNodes();
 					switchTo29BitTransmitMode();
+					send29BitWakeup();
 				}
 
 				});// end of post
@@ -666,6 +676,16 @@ public class CommandSession {
 		return true;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
+	private boolean send29BitWakeup () {
+		if (!ebt.sendATInitialization(new String[] {"AT SH 00 20 45"})) return false;
+		ebt.sendOBDCommand("00 00 28 21"); // Keyfob sets this network level upon press
+		return true;
+	}
+	
 	private boolean sendWakeupAllNodes() {
 		String response;
 		
@@ -676,23 +696,38 @@ public class CommandSession {
 		response = ebt.sendOBDCommand("00");
 		response = ebt.sendOBDCommand("00");
 		if (!ebt.sendATInitialization(new String[] {"AT SH 621"})) return false;
-		response = ebt.sendOBDCommand("01 7F"); // lites up everything as far as I can tell.  
+		// Work your way up - 01 02, 01 7f, etc. That ramps it up I guess. 
 		response = ebt.sendOBDCommand("01 02"); // Keyfob sets this network level upon press 
+		response = ebt.sendOBDCommand("01 7F"); // lites up everything as far as I can tell.  
+		if (!ebt.sendATInitialization(new String[] {"AT SH 638"})) return false;
+		// Work your way up - 01 02, 01 7f, etc. That ramps it up I guess. 
+		response = ebt.sendOBDCommand("01 02"); // Keyfob sets this network level upon press 
+		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
+		response = ebt.sendOBDCommand("01 7F"); // lites up everything as far as I can tell.  
 //		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
 //		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
 //		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
 //		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
-//		response = ebt.sendOBDCommand("00 19"); // OnStar is alive when network is in this mode. 
-		if (DEBUG) msg ("wake-up message has been sent. Response was: " + response);
+		if (DEBUG) msg ("wake-up message has been sent.");
 		
 		return true;
 	}
 
+	/**
+	 * does what it says. 
+	 * @return
+	 */
+	// TODO: put this function in the new TransportAdaptor layer when it's ready. 
 	private boolean switchTo11BitTransmitMode() {
+		//if (! ebt.getStats().getStat("elmAdvancedVersion").equals("?")) {
+		
+//		if (DEBUG) msg ("Suspect chipset is Scantool.net enhanced command set... ");
+		// ELM stuff...
 		if (DEBUG) msg ("Switching transmit mode to SWCAN + 11-bit");
 		if (!ebt.sendATInitialization(new String[] {"AT PP 2C SV C0"})) return false;
 		// warm-start the ELM chip, so the PP parameter change takes affect. Do this by running the resume command sequence, so we end up in a predictable state. 
 		if (!ebt.sendATInitialization(resumeCommands)) return false;
+		
 		return true;
 	}
 
