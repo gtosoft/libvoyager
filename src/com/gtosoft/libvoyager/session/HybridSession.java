@@ -173,11 +173,15 @@ public class HybridSession {
 	}
 
 	private void msg(String m) {
+		
+		// append thread info to the message. 
+		m = "[T=" + Thread.currentThread().getId() + "] " + m;
 
-		if (mecbMsg != null)
+		if (mecbMsg != null) {
 			mecbMsg.onNewMessageArrived(m);
-		else
-			Log.d("HS", m);
+		} else {
+	        Log.d("HS",m);
+		}
 
 	}
 

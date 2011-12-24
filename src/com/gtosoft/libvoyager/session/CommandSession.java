@@ -244,6 +244,7 @@ public class CommandSession {
 				
 				if (DEBUG==true) msg ("Command worker terminated.");
 				mtWorkerThread = null;
+				mhWorkerHandler = null;
 			}// end of worker thread's run()
 		};// end of worker thread definition
 		
@@ -433,7 +434,6 @@ public class CommandSession {
 		
 		for (int i=0;i<cmdParts.length;i++) {
 			thisCommand = cmdParts[i].trim();
-			final String _thisCommand = thisCommand;
 			
 			if (DEBUG) msg ("CommandSession: Processing command sub-command: " + thisCommand);
 
@@ -461,19 +461,15 @@ public class CommandSession {
 			}
 			
 			
-			// Is a header present, if so then set headers. 
+			// Is a 29-bit header present, if so then set headers. 
 			if (cmdParts[i].length() > 11) {
-				setHeaders (cmdParts[i].substring(0,12));
+				String headers = cmdParts[i].substring(0,12); 
 				thisCommand = cmdParts[i].substring(12);
+				setHeaders (headers);
 			}
 
-			// send it on its way. Must send this in the same thread as all other stuff in this function.
-			mhWorkerHandler.post(new Runnable () {
-				public void run () {
-					ebt.sendOBDCommand(_thisCommand);
-				}
-			} );
-
+			ebt.sendOBDCommand(thisCommand);
+			
 		}// end of loop that loops through all the commands in the semi-colon separated list. 
 		
 		// This only checks the last command in the string but if it returns an error, return false. 
@@ -556,8 +552,15 @@ public class CommandSession {
 
 	private void threadsOff() {
 		mThreadsOn = false;
-		if (mtWorkerThread != null) 
+		
+		if (mtWorkerThread != null) {
 			mtWorkerThread.interrupt();
+			// block while we wait for the worker thread to quit...
+//			while (mtWorkerThread != null) {
+//				msg ("Blocking while command worker thread terminates...");
+//				EasyTime.safeSleep(200);
+//			}
+		}
 
 		if (mStateManagementThread != null) 
 			mStateManagementThread.interrupt();
@@ -652,17 +655,24 @@ public class CommandSession {
 	 * 3. Switch back to 29-bit transmit mode. 
 	 */
 	public void wakeUpAllNetworks() {
-		if (mhWorkerHandler != null) {
-			mhWorkerHandler.post(new Runnable () {
-				public void run () {
-					switchTo11BitTransmitMode();
-					sendWakeupAllNodes();
-					switchTo29BitTransmitMode();
-					send29BitWakeup();
-				}
-
-				});// end of post
-		}// end of "if worker handler isn't null"
+		if (mhWorkerHandler == null) {
+			msg ("commandSession: ERROR: worker thread is null!?");
+			return;
+		}
+		
+//		if (mhWorkerHandler != null) {
+//			mhWorkerHandler.post(new Runnable () {
+//				public void run () {
+		if (DEBUG) msg ("wakeUpAllNetworks(): Waking all networks!");
+		switchTo11BitTransmitMode();
+		sendWakeupAllNodes();
+		switchTo29BitTransmitMode();
+		send29BitWakeup();
+		if (DEBUG) msg ("wakeUpAllNetworks(): Finished waking all networks!");
+//				}
+//
+//				});// end of post
+//		}// end of "if worker handler isn't null"
 	}// end of "wake up all networks" command. 
 
 	

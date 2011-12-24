@@ -27,6 +27,7 @@ import com.gtosoft.libvoyager.db.DashDB;
 
 
 public class NetworkStats {
+	private final static boolean DEBUG = false;
 
 	GeneralStats mgStats = new GeneralStats();
 	
@@ -104,6 +105,7 @@ public class NetworkStats {
 				String backupDirectory = Environment.getExternalStorageDirectory()+ "/voyager";
 				mkdir (backupDirectory);
 				String fullPath = backupDirectory + "/" + mLogFileName;
+				msg ("Preparing logger file " + fullPath);
 				mLogFile = new FileWriter(fullPath,true);
 				mgStats.setStat("replaylog.path", fullPath);
 			} catch (Exception e1) {
@@ -131,7 +133,7 @@ public class NetworkStats {
 
 	public boolean appendLog (String dataLine) {
 		if (mLogFile == null) {
-			msg ("Error appending to logfile: file handle is null");
+			if (DEBUG) msg ("Error appending to logfile: file handle is null");
 			return false;
 		}
 		
