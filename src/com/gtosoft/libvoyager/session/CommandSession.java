@@ -455,8 +455,13 @@ public class CommandSession {
 			
 			// is this a request to wake up all networks? TODO: Add ability to wake up specific networks?
 			if (thisCommand.contains("WAKEALL")) {
-				if (DEBUG) msg ("Encountered wake-up sub-command. performing all-node wakeup!");
-				wakeUpAllNetworks();
+				msg ("WARNING: Network wake-up has been disabled for the time being");
+				msg ("WARNING: Network wake-up has been disabled for the time being");
+				msg ("WARNING: Network wake-up has been disabled for the time being");
+				msg ("WARNING: Network wake-up has been disabled for the time being");
+				msg ("WARNING: Network wake-up has been disabled for the time being");
+//				if (DEBUG) msg ("Encountered wake-up sub-command. performing all-node wakeup!");
+//				wakeUpAllNetworks();
 				continue;
 			}
 			
